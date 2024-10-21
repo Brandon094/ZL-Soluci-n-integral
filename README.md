@@ -37,7 +37,7 @@ Para ejecutar la aplicación, necesitas tener instalado el **Java Development Ki
      `ZL_Solución_Integral-1.0-SNAPSHOT-jar-with-dependencies.jar`.
    - Si tu sistema no abre el archivo `.jar` directamente, puedes usar el siguiente comando en la terminal o símbolo del sistema:
      ```bash
-     java -jar ZL_Solución_Integral-1.0-SNAPSHOT-jar-with-dependencies.jar
+     java -jar ZL_Solucion_Integral-1.0-SNAPSHOT-jar-with-dependencies.jar
      ```
 
 ---
