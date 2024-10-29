@@ -7,6 +7,8 @@ import com.mycompany.zl_solucion_integral.models.Producto;
 import com.mycompany.zl_solucion_integral.models.Sesion;
 import com.mycompany.zl_solucion_integral.models.Venta;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 
@@ -28,7 +30,8 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
     VentasController ventasCtrl = new VentasController();
     ProductoController productoCtrl = new ProductoController();
-    private Venta ventaCotizada;  // Variable para almacenar la cotización
+    // Define el ArrayList de ventas a nivel de la clase
+    private List<Venta> ventasCotizadas = new ArrayList<>();
     private Sesion sesion;
 
     /**
@@ -74,15 +77,13 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
             // Validar que se haya encontrado el producto
             if (productoEncontrado == null) {
-                JOptionPane.showMessageDialog(this, "Producto no encontrado.", "Error", 
+                JOptionPane.showMessageDialog(this, "Producto no encontrado.", "Error",
                         JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
-            // Parsear cantidad
+            // Parsear cantidad, descuento
             int cantidad = Integer.parseInt(cantidadStr);
-
-            // Parsear descuento
             double descuento = descuentoStr.isEmpty() ? 0.0 : Double.parseDouble(descuentoStr);
 
             // Calcular total
@@ -96,7 +97,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
             return new Venta(codigo, productoEncontrado, cantidad, cliente, NoCcCliente, fecha, vendedor, total, descuento);
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Datos inválidos. Verifique los campos numéricos.", "Error", 
+            JOptionPane.showMessageDialog(this, "Datos inválidos. Verifique los campos numéricos.", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return null;
         }
@@ -104,8 +105,8 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
     // Método para validar campos antes de procesar la venta
     public boolean validarCampos() {
-        if (ventaCotizada == null) {
-            JOptionPane.showMessageDialog(this, "Debe realizar una cotización antes de registrar la venta.", "Error", 
+        if (ventasCotizadas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debe realizar una cotización antes de registrar la venta.", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -474,38 +475,100 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         dbMag.setVisible(true);
     }//GEN-LAST:event_btnMenuPrincipalActionPerformed
 
-    private void mostrarInformacionCotizacion(Venta venta) {
-        textCliente.setText("Cliente: " + venta.getNameCliente());
-        textCc.setText("C.C: " + venta.getNoCcCliente());
-        Producto productoEncontrado = venta.getProducto();
-        textProductoInfo.setText("Producto: " + productoEncontrado.getProducto());
-        textPrecioUnitarioInfo.setText("Precio unitario: " + productoEncontrado.getPrecio());
-        textCantidadInfo.setText("Cantidad: " + venta.getCantidad());
+    private void mostrarInformacionCotizacion(List<Venta> ventas) {
+        // Limpiar los campos de texto antes de agregar nueva información
+        textCliente.setText("Cliente:");
+        textCc.setText("# C.C Cliente:");
+        textProductoInfo.setText("Producto:");
+        textPrecioUnitarioInfo.setText("Precio:");
+        textCantidadInfo.setText("Cantidad:");
+        textDescuentoInfo.setText("Descuento:");
+        textDescuentoAplicado.setText("Descuento aplicado:");
+        textVendedor.setText("Vendedor:");
+        textValorTotal.setText("Valor total:");
 
-        double valorSinDescuento = productoEncontrado.getPrecio() * venta.getCantidad();
-        if (venta.getDescuento() > 0) {
-            double descuentoFinal = valorSinDescuento - venta.getTotal();
-            textDescuentoInfo.setText("Descuento: " + venta.getDescuento() + "%");
-            textDescuentoAplicado.setText("Descuento aplicado: " + descuentoFinal);
+        if (!ventas.isEmpty()) {
+            // Obtener la información del primer cliente (asumiendo que todas las ventas son del mismo cliente)
+            Venta primeraVenta = ventas.get(0);
+            textCliente.setText("Cliente: " + primeraVenta.getNameCliente());
+            textCc.setText("C.C: " + primeraVenta.getNoCcCliente());
+
+            // Variables para concatenar la información de todos los productos
+            StringBuilder productos = new StringBuilder();
+            StringBuilder precios = new StringBuilder();
+            StringBuilder cantidades = new StringBuilder();
+            StringBuilder descuentos = new StringBuilder();
+            StringBuilder descuentosAplicados = new StringBuilder();
+
+            // Inicializar el total acumulado
+            double totalFinal = 0;
+
+            // Recorrer todas las ventas y construir las cadenas separadas por comas
+            for (Venta venta : ventas) {
+                Producto producto = venta.getProducto();
+
+                // Agregar información separada por comas
+                if (productos.length() > 0) {
+                    productos.append(", "); // Si no es el primero, agregar coma
+                }
+                productos.append(producto.getProducto());
+
+                if (precios.length() > 0) {
+                    precios.append(", ");
+                }
+                precios.append(producto.getPrecio());
+
+                if (cantidades.length() > 0) {
+                    cantidades.append(", ");
+                }
+                cantidades.append(venta.getCantidad());
+
+                if (descuentos.length() > 0) {
+                    descuentos.append(", ");
+                }
+                descuentos.append(venta.getDescuento() > 0 ? venta.getDescuento() + "%" : "No aplica");
+
+                if (descuentosAplicados.length() > 0) {
+                    descuentosAplicados.append(", ");
+                }
+                double valorSinDescuento = producto.getPrecio() * venta.getCantidad();
+                double descuentoFinal = (venta.getDescuento() > 0) ? valorSinDescuento - venta.getTotal() : 0;
+                descuentosAplicados.append(descuentoFinal);
+
+                // Sumar el total de la venta actual al total final
+                totalFinal += venta.getTotal();
+            }
+
+            // Asignar los valores concatenados a los campos correspondientes
+            textProductoInfo.setText("Producto(s): " + productos.toString());
+            textPrecioUnitarioInfo.setText("Precio(s): " + precios.toString());
+            textCantidadInfo.setText("Cantidad(es): " + cantidades.toString());
+            textDescuentoInfo.setText("Descuento(s): " + descuentos.toString());
+            textDescuentoAplicado.setText("Descuento aplicado(s): " + descuentosAplicados.toString());
+
+            // Mostrar el nombre del vendedor y el total final acumulado
+            textVendedor.setText("Vendedor: " + sesion.getUsuarioLogueado());
+            textValorTotal.setText("Valor total: " + totalFinal);
         } else {
-            textDescuentoInfo.setText("Descuento: No aplica.");
-            textDescuentoAplicado.setText("Descuento aplicado: No aplica.");
+            JOptionPane.showMessageDialog(this, "No hay productos cotizados.", "Información de cotización", JOptionPane.INFORMATION_MESSAGE);
         }
-
-        textVendedor.setText("Vendedor: " + sesion.getUsuarioLogueado());
-        textValorTotal.setText("Valor total: " + venta.getTotal());
     }
 
     private void btnCotizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCotizarActionPerformed
         Venta venta = obtenerDatosFormulario();
         if (venta != null) {
-            // Mostrar la información cotizada
-            mostrarInformacionCotizacion(venta);
+            // Primero agrega la venta a la lista de cotizadas
+            ventasCotizadas.add(venta);
 
-            // Almacenar la cotización
-            ventaCotizada = venta;
-            JOptionPane.showMessageDialog(this, "Cotización realizada con éxito.", 
+            // Luego muestra la información de la cotización
+            mostrarInformacionCotizacion(ventasCotizadas);
+
+            // Muestra mensaje de éxito
+            JOptionPane.showMessageDialog(this, "Cotización realizada con éxito.",
                     "Cotización", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, completa todos los campos requeridos.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnCotizarActionPerformed
 
@@ -526,7 +589,9 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                 venta.setId(idVenta);
                 ventasCtrl.modificarVenta(venta, idVenta, tbVentas);
                 ventasCtrl.MostrarVentas(tbVentas);
-                mostrarInformacionCotizacion(venta);
+                List<Venta> ventas = new ArrayList<>();
+                ventas.add(venta);
+                mostrarInformacionCotizacion(ventas);
                 limpiarFormulario();
             } else {
                 JOptionPane.showMessageDialog(this, "Debe seleccionar una venta para modificar.");
@@ -554,14 +619,12 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
     // Metodo para Guardar la venta en la base de datos
     private void btnGuardarVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarVentaActionPerformed
-        // Verificar si ya se ha realizado una cotización
-        if (ventaCotizada == null) {
+        if (ventasCotizadas.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Debe realizar una cotización antes de registrar la venta.",
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
         } else {
-            // llamar el formulario para confirmar la venta 
-            FormConfiVenta formConfiVenta = new FormConfiVenta(ventaCotizada, tbVentas);
+            FormConfiVenta formConfiVenta = new FormConfiVenta(ventasCotizadas, tbVentas);
             formConfiVenta.setVisible(true);
         }
     }//GEN-LAST:event_btnGuardarVentaActionPerformed

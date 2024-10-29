@@ -132,17 +132,13 @@ public class ConexionDB {
     /**
      * Crea la tabla 'ventas' si no existe.
      *
-     * La tabla 'ventas' contiene las columnas: id, fecha, total y cliente_id.
-     * Esta tabla almacena la información de las ventas realizadas, con una
-     * referencia a los usuarios que realizaron la compra.
+     * La tabla 'ventas' contiene las columnas: id, cliente, cc_cliente,
+     * vendedor, fecha y total. Esta tabla almacena la información general de la
+     * venta.
      */
     public void crearTablaVentasSiNoExiste() {
         String sql = "CREATE TABLE IF NOT EXISTS ventas ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "producto TEXT NOT NULL,"
-                + "cantidad INTEGER NOT NULL,"
-                + "codigo TEXT NOT NULL,"
-                + "precio REAL NOT NULL,"
                 + "cliente TEXT NOT NULL,"
                 + "cc_cliente TEXT NOT NULL,"
                 + "vendedor TEXT NOT NULL,"
@@ -157,6 +153,37 @@ public class ConexionDB {
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al crear la tabla 'ventas': " + e.getMessage());
+        } finally {
+            cerrarConexion();
+        }
+    }
+
+    /**
+     * Crea la tabla 'detalles_venta' si no existe.
+     *
+     * La tabla 'detalles_venta' contiene las columnas: id, venta_id, producto,
+     * cantidad, código, precio y total. Esta tabla almacena la información
+     * detallada de cada producto vendido en una venta específica.
+     */
+    public void crearTablaDetallesVentaSiNoExiste() {
+        String sql = "CREATE TABLE IF NOT EXISTS detalles_venta ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "venta_id INTEGER NOT NULL,"
+                + "producto TEXT NOT NULL,"
+                + "cantidad INTEGER NOT NULL,"
+                + "codigo TEXT NOT NULL,"
+                + "precio REAL NOT NULL,"
+                + "total REAL NOT NULL,"
+                + "FOREIGN KEY (venta_id) REFERENCES ventas(id)"
+                + ");";
+
+        try (Connection conn = establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.execute();
+            System.out.println("Tabla 'detalles_venta' verificada o creada correctamente.");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al crear la tabla 'detalles_venta': " + e.getMessage());
         } finally {
             cerrarConexion();
         }

@@ -1,7 +1,11 @@
 package com.mycompany.zl_solucion_integral.vistas;
 
 import com.mycompany.zl_solucion_integral.controllers.VentasController;
+import com.mycompany.zl_solucion_integral.models.Producto;
 import com.mycompany.zl_solucion_integral.models.Venta;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -11,28 +15,52 @@ import javax.swing.table.DefaultTableModel;
  */
 public class FormConfiVenta extends javax.swing.JFrame {
 
-    private Venta ventaCotizada;  // Variable para almacenar la cotización
+    private List<Venta> ventasCotizadas = new ArrayList<>();  // Variable para almacenar la lista de cotizaciónes
     private JTable tbVentas;
+    private Venta primeraVenta = ventasCotizadas.get(0);// Asumimos que todos tienen el mismo cliente
 
-    public FormConfiVenta(Venta ventaCotizada, JTable tbVentas) {
+    public FormConfiVenta(List<Venta> ventasCotizadas, JTable tbVentas) {
         initComponents();
-        this.ventaCotizada = ventaCotizada;
+        //UtilVentanas.aplicarPantallaCompleta(this);
+        this.ventasCotizadas = ventasCotizadas;
         this.tbVentas = tbVentas;
-        cargarDatosVenta();
+        cargarDatosVentas();
     }
 
-    // Método para cargar los datos de la venta en los labels
-    private void cargarDatosVenta() {
-        if (ventaCotizada != null) {
-            jLabel2.setText("Nombre: " + ventaCotizada.getNameCliente());
-            jLabel3.setText("N° Cédula: " + ventaCotizada.getNoCcCliente());
-            jLabel4.setText("Código: " + ventaCotizada.getProducto().getCodigo());
-            jLabel5.setText("Producto: " + ventaCotizada.getProducto().getProducto());
-            jLabel6.setText("Precio unitario: " + ventaCotizada.getProducto().getPrecio());
-            jLabel7.setText("Cantidad: " + ventaCotizada.getCantidad());
-            jLabel10.setText("Descuento: " + ventaCotizada.getDescuento());
-            jLabel8.setText("Precio Total: " + ventaCotizada.getTotal());
-            jLabel9.setText("Vendedor: " + ventaCotizada.getVendedor());
+    // Método para cargar los datos de las ventas en los labels
+    private void cargarDatosVentas() {
+        if (ventasCotizadas != null && !ventasCotizadas.isEmpty()) {
+            // Mostrar la información del cliente            
+            textNombre.setText("Nombre: " + primeraVenta.getNameCliente());
+            textCedula.setText("N° Cédula: " + primeraVenta.getNoCcCliente());
+            textVendedor.setText("Vendedor: " + primeraVenta.getVendedor());
+
+            // Inicializar total
+            double totalGeneral = 0;
+
+            // Crear un modelo para la lista de productos cotizados
+            DefaultListModel<String> modeloLista = new DefaultListModel<>();
+
+            // Recorrer la lista de ventas y llenar el modelo de la lista
+            for (Venta venta : ventasCotizadas) {
+                String productoInfo = String.format(
+                        "Código: %s | Producto: %s | Precio unitario: %.2f | Cantidad: %d | Descuento: %.2f | Precio Total: %.2f",
+                        venta.getProducto().getCodigo(),
+                        venta.getProducto().getProducto(),
+                        venta.getProducto().getPrecio(),
+                        venta.getCantidad(),
+                        venta.getDescuento(),
+                        venta.getTotal()
+                );
+                modeloLista.addElement(productoInfo);
+                totalGeneral += venta.getTotal(); // Sumar el total de cada venta
+            }
+
+            // Establecer el modelo en la lista
+            listProCotizados.setModel(modeloLista);
+
+            // Mostrar el total general
+            textPrecioTotal.setText("Precio Total: " + totalGeneral);
         }
     }
 
@@ -45,23 +73,24 @@ public class FormConfiVenta extends javax.swing.JFrame {
         btnCancelar = new javax.swing.JButton();
         btnConfVenta = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        textNombre = new javax.swing.JLabel();
+        textCedula = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        listProCotizados = new javax.swing.JList<>();
+        btnEliminar = new javax.swing.JButton();
+        textPrecioTotal = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        jLabel9 = new javax.swing.JLabel();
+        textVendedor = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
         jLabel1.setText("Confirmacion de venta");
+        jLabel1.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        jLabel1.setAutoscrolls(true);
+        jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         btnCancelar.setText("Cancelar Venta");
         btnCancelar.addActionListener(new java.awt.event.ActionListener() {
@@ -80,9 +109,9 @@ public class FormConfiVenta extends javax.swing.JFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Informacion de cliente"));
         jPanel1.setToolTipText("");
 
-        jLabel2.setText("Nombre:");
+        textNombre.setText("Nombre:");
 
-        jLabel3.setText("N° Cedula:");
+        textCedula.setText("N° Cedula:");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -91,33 +120,37 @@ public class FormConfiVenta extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3))
+                    .addComponent(textNombre)
+                    .addComponent(textCedula))
                 .addContainerGap(107, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2)
+                .addComponent(textNombre)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel3)
+                .addComponent(textCedula)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Informacion de producto"));
 
-        jLabel4.setText("Codigo:");
+        listProCotizados.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane1.setViewportView(listProCotizados);
 
-        jLabel5.setText("Producto:");
+        btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
 
-        jLabel6.setText("Precio unitario:");
-
-        jLabel8.setText("Precio Total:");
-
-        jLabel7.setText("Cantidad:");
-
-        jLabel10.setText("Descuento:");
+        textPrecioTotal.setText("Total:");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -125,35 +158,29 @@ public class FormConfiVenta extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabel8)
-                    .addComponent(jLabel7)
-                    .addComponent(jLabel10))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnEliminar)
+                    .addComponent(textPrecioTotal))
+                .addGap(12, 12, 12))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel8))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(textPrecioTotal)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnEliminar)))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Informacion de vendedor"));
 
-        jLabel9.setText("Vendedor:");
+        textVendedor.setText("Vendedor:");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -161,14 +188,14 @@ public class FormConfiVenta extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel9)
+                .addComponent(textVendedor)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel9)
+                .addComponent(textVendedor)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -193,10 +220,10 @@ public class FormConfiVenta extends javax.swing.JFrame {
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
             .addComponent(jSeparator2)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(155, 155, 155)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 291, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addContainerGap(160, Short.MAX_VALUE))
+                .addGap(274, 274, 274))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -212,50 +239,113 @@ public class FormConfiVenta extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCancelar)
-                    .addComponent(btnConfVenta))
-                .addContainerGap())
+                    .addComponent(btnConfVenta)
+                    .addComponent(btnCancelar))
+                .addGap(12, 12, 12))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnConfVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfVentaActionPerformed
-        // Instanciar el controlador de ventas para agregar la venta
+        System.out.println("Botón Confirmar presionado");
         VentasController ventasCtrl = new VentasController();
 
-        // Guardar la venta en la base de datos o tabla de ventas
-        ventasCtrl.guardarVenta(ventaCotizada, tbVentas);
+        List<Producto> productosCotizados = obtenerProductosCotizados();
 
-        // Acctualizar la tabla ventas con los nuevos datos
-        ((javax.swing.table.AbstractTableModel) tbVentas.getModel()).fireTableDataChanged();
-        this.dispose();
+        if (productosCotizados.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "No hay productos para confirmar la venta.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            // Crear y configurar la nueva venta
+            Venta venta = new Venta();
+            venta.setNameCliente(primeraVenta.getNameCliente());
+            venta.setNoCcCliente(primeraVenta.getNoCcCliente());
+            venta.setVendedor(primeraVenta.getVendedor());
+
+            // Asegúrate de establecer un producto para la venta
+            if (!productosCotizados.isEmpty()) {
+                venta.setProducto(productosCotizados.get(0)); // Establecer el primer producto como ejemplo
+            }
+
+            // Calcular el total de la venta
+            double totalGeneral = 0;
+            for (Venta v : ventasCotizadas) {
+                totalGeneral += v.getTotal();
+            }
+            venta.setTotal(totalGeneral);
+            venta.setFecha(java.time.LocalDate.now());
+
+            // Guardar la venta
+            ventasCtrl.guardarVenta(venta, productosCotizados, tbVentas);
+            ((javax.swing.table.AbstractTableModel) tbVentas.getModel()).fireTableDataChanged();
+            this.dispose();
+        } catch (Exception e) {
+            System.out.println(e.getMessage()); // Mostrar el mensaje de error en consola
+            javax.swing.JOptionPane.showMessageDialog(this, "Error al confirmar la venta: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnConfVentaActionPerformed
+
+    private List<Producto> obtenerProductosCotizados() {
+        List<Producto> productos = new ArrayList<>();
+        for (Venta venta : ventasCotizadas) {
+            productos.add(venta.getProducto()); // Suponiendo que 'getProducto()' devuelve un objeto de tipo Producto
+        }
+        return productos;
+    }
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
         this.setVisible(false);
     }//GEN-LAST:event_btnCancelarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        int selectedIndex = listProCotizados.getSelectedIndex();
+
+        if (selectedIndex != -1) {
+            // Eliminar el producto seleccionado de la lista de ventas cotizadas
+            ventasCotizadas.remove(selectedIndex);
+
+            // Actualizar el modelo de la lista para reflejar la eliminación
+            DefaultListModel<String> modeloLista = (DefaultListModel<String>) listProCotizados.getModel();
+            modeloLista.remove(selectedIndex);
+
+            // Actualizar el precio total después de eliminar el producto
+            actualizarPrecioTotal();
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Por favor, seleccione un producto de la lista para eliminar.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void actualizarPrecioTotal() {
+        double totalGeneral = 0;
+        for (Venta venta : ventasCotizadas) {
+            totalGeneral += venta.getTotal();
+        }
+        textPrecioTotal.setText("Precio Total: " + totalGeneral);
+    }
 
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 // Crear un modelo de tabla ficticio para la JTable
                 DefaultTableModel modeloTabla = new DefaultTableModel(
-                    new Object[][]{}, // Datos vacíos
-                    new String[]{"Código", "Producto", "Cantidad", "Precio unitario", "Total"} // Columnas
+                        new Object[][]{}, // Datos vacíos
+                        new String[]{"Código", "Producto", "Cantidad", "Precio unitario", "Total"} // Columnas
                 );
                 JTable tbVentas = new JTable(modeloTabla);
 
-                // Crear una instancia ficticia de Venta
-                Venta venta = new Venta();
+                // Crear una lista ficticia de Ventas
+                List<Venta> ventas = new ArrayList<>();
                 // Suponiendo que tienes un constructor de Venta y puedes poblarla con datos de prueba.
 
                 // Llamar al constructor de FormConfiVenta con la venta y la tabla
-                new FormConfiVenta(venta, tbVentas).setVisible(true);
+                new FormConfiVenta(ventas, tbVentas).setVisible(true);
             }
         });
     }
@@ -263,20 +353,18 @@ public class FormConfiVenta extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnConfVenta;
+    private javax.swing.JButton btnEliminar;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JList<String> listProCotizados;
+    private javax.swing.JLabel textCedula;
+    private javax.swing.JLabel textNombre;
+    private javax.swing.JLabel textPrecioTotal;
+    private javax.swing.JLabel textVendedor;
     // End of variables declaration//GEN-END:variables
 }

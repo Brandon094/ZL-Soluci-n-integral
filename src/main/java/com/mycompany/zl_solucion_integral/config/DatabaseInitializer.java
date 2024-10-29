@@ -16,5 +16,6 @@ public class DatabaseInitializer {
         conexion.crearTablaUsuariosSiNoExiste();
         conexion.crearTablaVentasSiNoExiste();
         conexion.crearTablaProductosSiNoExiste();
+        conexion.crearTablaDetallesVentaSiNoExiste();
     }
 }
