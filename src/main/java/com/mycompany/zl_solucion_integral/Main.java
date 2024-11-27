@@ -3,6 +3,7 @@ package com.mycompany.zl_solucion_integral;
 import com.mycompany.zl_solucion_integral.config.ConexionDB;
 import com.mycompany.zl_solucion_integral.config.DatabaseInitializer;
 import com.mycompany.zl_solucion_integral.vistas.FormLogIn;
+import com.mycompany.zl_solucion_integral.vistas.FormRegistroUsuarios;
 import javax.swing.JOptionPane;
 
 /**
@@ -68,5 +69,7 @@ public class Main {
     private static void iniciarAplicacion() {
         FormLogIn loginForm = new FormLogIn();
         loginForm.setVisible(true);
+       //FormRegistroUsuarios ru = new FormRegistroUsuarios();
+       //ru.setVisible(true);
     }
 }

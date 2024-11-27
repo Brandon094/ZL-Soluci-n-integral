@@ -14,6 +14,7 @@ public class Usuario {
     private String email;
     private String contraseña;
     private String rol; // Se puede manejar como String o int según el diseño de tu aplicación
+    private String noCc;
 
     // Constructor vacío (útil para instanciar sin datos iniciales)
     public Usuario() {
@@ -78,17 +79,16 @@ public class Usuario {
         this.rol = rol;
     }
 
-    // Método para representar al usuario como cadena de texto 
-    //(opcional, útil para depuración)
+    public String getNoCc() {
+        return noCc;
+    }
+
+    public void setNoCc(String noCc) {
+        this.noCc = noCc;
+    }
+
     @Override
     public String toString() {
-        return "Usuario{"
-                + "id=" + id
-                + ", nombre='" + nombre + '\''
-                + ", telefono='" + telefono + '\''
-                + ", email='" + email + '\''
-                + ", contraseña='" + contraseña + '\''
-                + ", rol='" + rol + '\''
-                + '}';
+        return "Usuario{" + "id=" + id + ", nombre=" + nombre + ", telefono=" + telefono + ", email=" + email + ", contrase\u00f1a=" + contraseña + ", rol=" + rol + ", noCc=" + noCc + '}';
     }
 }

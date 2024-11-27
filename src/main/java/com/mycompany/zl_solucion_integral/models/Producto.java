@@ -1,21 +1,28 @@
 package com.mycompany.zl_solucion_integral.models;
 
+import com.mycompany.zl_solucion_integral.config.ConexionDB;
+
 public class Producto {
 
+    private final ConexionDB conexion; // Variable global para la conexión
     // Atributos 
     private int id;
     private String producto;
     private double precio;
     private int cantidad;
+    private int cantidadSolicitada;
     private String codigo;
     private double total;
+    private String categoria;
 
     // Constructor vacío (útil para instanciar sin datos iniciales)
     public Producto() {
+        this.conexion = new ConexionDB(); // Asegúrate de que ConexionDB esté bien definida.
     }
 
     // Constructor con parámetros (para inicializar con datos, incluyendo el total)
     public Producto(int id, String producto, double precio, int cantidad, String codigo, double total) {
+        this();
         this.id = id;
         this.producto = producto;
         this.precio = precio;
@@ -26,6 +33,7 @@ public class Producto {
 
     // Constructor sin el parametro id 
     public Producto(String producto, double precio, int cantidad, String codigo, double total) {
+        this();
         this.producto = producto;
         this.precio = precio;
         this.cantidad = cantidad;
@@ -35,10 +43,21 @@ public class Producto {
 
     // Constructor sin el parametro de total 
     public Producto(String producto, Double precio, int cantidad, String codigo) {
+        this();
         this.producto = producto;
         this.precio = precio;
         this.cantidad = cantidad;
         this.codigo = codigo;
+    }
+
+    // Constructor con el parametro de categoria 
+    public Producto(String producto, Double precio, int cantidad, String codigo, String categoria) {
+        this();
+        this.producto = producto;
+        this.precio = precio;
+        this.cantidad = cantidad;
+        this.codigo = codigo;
+        this.categoria = categoria;
     }
 
     // Getters y Setters para cada atributo
@@ -90,13 +109,30 @@ public class Producto {
         this.total = total;
     }
 
-    // Método para representar al usuario como cadena de texto (opcional, útil para depuración)
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public int getCantidadSolicitada() {
+        return cantidadSolicitada;
+    }
+
+    public void setCantidadSolicitada(int cantidadSolicitada) {
+        this.cantidadSolicitada = cantidadSolicitada;
+    }
+
     @Override
     public String toString() {
-        return "ID: " + id + "\n"
-                + " Nombre: " + producto + "\n"
-                + " Precio: " + precio + "\n"
-                + " Cantidad: " + cantidad + "\n"
-                + " Código: " + codigo;
+        return "id=" + id + ", "
+                + "producto=" + producto + ", "
+                + "precio=" + precio + ", "
+                + "cantidad=" + cantidad + ", "
+                + "codigo=" + codigo + ", "
+                + "total=" + total + ", "
+                + "categoria=" + categoria;
     }
 }

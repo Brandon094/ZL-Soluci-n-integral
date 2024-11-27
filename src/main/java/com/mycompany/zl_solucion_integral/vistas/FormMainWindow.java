@@ -62,6 +62,7 @@ public class FormMainWindow extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Lucida Console", 0, 36)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Administrar base de datos");
+        jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         btnSalir.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         btnSalir.setText("Salir de la app");
@@ -72,9 +73,11 @@ public class FormMainWindow extends javax.swing.JFrame {
         });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         btnRegistroProductos.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnRegistroProductos.setText("Registro de productos");
+        btnRegistroProductos.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRegistroProductos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRegistroProductosActionPerformed(evt);
@@ -83,6 +86,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnRegistroUsuarios.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnRegistroUsuarios.setText("Registro de usuarios");
+        btnRegistroUsuarios.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRegistroUsuarios.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRegistroUsuariosActionPerformed(evt);
@@ -91,6 +95,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnRegistroVentas.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnRegistroVentas.setText("Registro de ventas");
+        btnRegistroVentas.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRegistroVentas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRegistroVentasActionPerformed(evt);
@@ -99,6 +104,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnInformes.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnInformes.setText("Informes");
+        btnInformes.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnInformes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnInformesActionPerformed(evt);
@@ -109,31 +115,31 @@ public class FormMainWindow extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(122, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(btnRegistroVentas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(114, 114, 114)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(btnRegistroProductos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnRegistroUsuarios, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnRegistroProductos, javax.swing.GroupLayout.DEFAULT_SIZE, 650, Short.MAX_VALUE)
+                    .addComponent(btnRegistroVentas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnInformes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(104, 104, 104))
+                .addGap(116, 116, 116))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(63, 63, 63)
+                .addGap(66, 66, 66)
                 .addComponent(btnRegistroProductos)
-                .addGap(42, 42, 42)
-                .addComponent(btnRegistroUsuarios)
-                .addGap(42, 42, 42)
-                .addComponent(btnRegistroVentas)
-                .addGap(41, 41, 41)
-                .addComponent(btnInformes)
-                .addContainerGap(70, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnRegistroUsuarios, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnRegistroVentas, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnInformes, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(120, Short.MAX_VALUE))
         );
 
         btnCerrarSecion.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
-        btnCerrarSecion.setText("Cerrar secion");
+        btnCerrarSecion.setText("Cerrar sesìon");
         btnCerrarSecion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCerrarSecionActionPerformed(evt);
@@ -144,39 +150,40 @@ public class FormMainWindow extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator1)
-            .addComponent(jSeparator2)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCerrarSecion)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnSalir)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnCerrarSecion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(799, 799, 799)
+                        .addComponent(btnSalir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(302, 302, 302)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(307, 307, 307)))
                 .addContainerGap())
+            .addComponent(jSeparator2)
             .addGroup(layout.createSequentialGroup()
-                .addGap(210, 210, 210)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 222, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(374, 374, 374)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(6, 6, 6)
+                .addComponent(jSeparator1))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(12, 12, 12)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCerrarSecion)
                     .addComponent(btnSalir))
-                .addGap(18, 18, 18))
+                .addContainerGap(69, Short.MAX_VALUE))
         );
 
         pack();

@@ -1,10 +1,15 @@
 package com.mycompany.zl_solucion_integral.vistas;
 
+import com.mycompany.zl_solucion_integral.config.Listener;
 import com.mycompany.zl_solucion_integral.config.UtilVentanas;
 import com.mycompany.zl_solucion_integral.controllers.ProductoController;
 import com.mycompany.zl_solucion_integral.models.Producto;
+import com.mycompany.zl_solucion_integral.util.ExcelSQLiteManager;
+
+import javax.swing.JFileChooser;
+import java.io.File;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
+import javax.swing.JTextField;
 
 /**
  * Ventana para registrar y gestionar productos. Controla el registro,
@@ -16,6 +21,7 @@ public class FormRegistroProductos extends javax.swing.JFrame {
     // Controlador para manejar las operaciones con los productos
 
     ProductoController productoCtrl = new ProductoController();
+    Listener listenerTb = new Listener();
 
     /*
     * Constructor que inicaliza la ventana y muestra los productos en la tabla
@@ -24,10 +30,34 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         initComponents();
         setTitle("Registro de productos");
         UtilVentanas.aplicarPantallaCompleta(this);
+
         // Mostrar los datos de la tabla productos
         productoCtrl.mostrarProductos(tbProductos);
-        // inicializar el metodo para obtener los datos del producto selecionado
-        agregarListenerTablaProductos(tbProductos);
+
+        // Rellenar el JComboBox de categorias
+        initComboBoxCategorias();
+
+        // Crear los campos de texto a llenar con los datos de la fila seleccionada
+        JTextField[] camposTexto = {txtProducto, txtCantidad, txtPrecio, txtCodigo, txtCategoria};
+
+        // Definir los índices de las columnas que quieres mostrar en los campos de texto
+        int[] columnas = {1, 3, 2, 4, 5}; // Suponiendo que las columnas son: Nombre, Cantidad, Precio, Código
+
+        // Inicializar el método para obtener los datos del producto seleccionado
+        listenerTb.agregarListenerTabla(tbProductos, camposTexto, columnas);
+    }
+
+    // Método para inicializar las categorías en el JComboBox
+    private void initComboBoxCategorias() {
+        ListCategoria.addItem("Todas"); // Opción para mostrar todos los productos
+        ListCategoria.addItem("DOTACION HOMBRE"); // Agrega tus categorías
+        ListCategoria.addItem("DOTACION DAMA"); // Agrega tus categorías
+        ListCategoria.addItem("CALZADO"); // Agrega tus categorías
+        ListCategoria.addItem("EPP"); // Agrega tus categorías
+        ListCategoria.addItem("BOTIQUIN");
+        ListCategoria.addItem("EQUIPO DE CONTINGENCIA");
+        ListCategoria.addItem("PUNTO ECOLOGICO");
+        // Agrega más categorías según las que tienes en la base de datos   
     }
 
     // Método para obtener los datos del formulario 
@@ -37,6 +67,7 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         String cantidadStr = txtCantidad.getText();
         String precioStr = txtPrecio.getText();
         String codigo = txtCodigo.getText();
+        String categoria = txtCategoria.getText();
 
         // Inicializar variables para cantidad y precio
         int cantidad = 0;
@@ -53,7 +84,7 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         }
 
         // Crear y retornar un objeto Producto con los datos
-        return new Producto(productoNombre, precio, cantidad, codigo);
+        return new Producto(productoNombre, precio, cantidad, codigo, categoria);
     }
 
     @SuppressWarnings("unchecked")
@@ -78,25 +109,39 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
+        btnImportarExcel = new javax.swing.JButton();
+        btnExportar = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        txtCategoria = new javax.swing.JTextField();
+        ListCategoria = new javax.swing.JComboBox<>();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jSeparator3 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         tbProductos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         tbProductos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
-                "Id", "producto", "precio", "cantidad", "precio total"
+                "Id", "producto", "precio", "cantidad"
             }
         ));
+        tbProductos.setSelectionForeground(new java.awt.Color(0, 0, 0));
         jScrollPane1.setViewportView(tbProductos);
 
         jLabel1.setFont(new java.awt.Font("Lucida Console", 0, 36)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Registro de Productos");
+        jLabel1.setToolTipText("");
 
         btnMenuPricipal.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         btnMenuPricipal.setText("Menu principal");
@@ -164,6 +209,26 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel6.setText("Codigo:");
 
+        btnImportarExcel.setText("Importar Excel");
+        btnImportarExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImportarExcelActionPerformed(evt);
+            }
+        });
+
+        btnExportar.setText("Exportar Excel");
+        btnExportar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportarActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setText("Importa tus datos desde un archivo excel");
+
+        jLabel7.setText("Exporta tus productos a un archivo excel");
+
+        jLabel8.setText("Categoria:");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -171,60 +236,98 @@ public class FormRegistroProductos extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnGuardar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addComponent(btnExportar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnImportarExcel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel7)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnModificar, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel3)
+                                    .addGap(48, 48, 48)
+                                    .addComponent(txtProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel4)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLabel5)
+                                    .addGap(49, 49, 49)
+                                    .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel6)
-                                    .addComponent(jLabel4)
-                                    .addComponent(jLabel3)
-                                    .addComponent(jLabel5))
-                                .addGap(48, 48, 48)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtProducto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtPrecio, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtCantidad, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtCodigo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                    .addComponent(jLabel8))
+                                .addGap(53, 53, 53)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtCategoria)
+                                    .addComponent(txtCodigo, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)))))
+                    .addComponent(btnGuardar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnModificar, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(52, 52, 52)
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addGap(30, 30, 30)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
-                .addComponent(btnGuardar)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnModificar)
-                    .addComponent(btnEliminar)))
+                    .addComponent(txtCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnGuardar)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnEliminar)
+                    .addComponent(btnModificar))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addGap(4, 4, 4)
+                .addComponent(btnImportarExcel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnExportar)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
+
+        ListCategoria.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ListCategoriaActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setText("Categoria:");
+
+        jLabel9.setText("Filtrar por:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator2)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -232,30 +335,48 @@ public class FormRegistroProductos extends javax.swing.JFrame {
                     .addComponent(btnMenuPricipal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnSalir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel9)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(ListCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1))
+                .addGap(12, 12, 12))
+            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(403, 403, 403)
-                .addComponent(jLabel1)
-                .addContainerGap(440, Short.MAX_VALUE))
+                .addGap(295, 295, 295)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(291, 291, 291))
+            .addComponent(jSeparator3)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addGap(13, 13, 13)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnMenuPricipal)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnSalir)
-                        .addContainerGap())
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 529, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSalir))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ListCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel9))
+                        .addGap(6, 6, 6)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(21, 21, 21))
         );
 
         pack();
@@ -302,10 +423,6 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         }
 
         try {
-            // Calcular el total (precio * cantidad)
-            double total = producto.getCantidad() * producto.getPrecio();
-            producto.setTotal(total);
-
             // Agregar o actualizar el producto en la base de datos
             productoCtrl.agregarOActualizarProductoSiExiste(producto);
 
@@ -333,26 +450,6 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         formConfEliminacion.setVisible(true);
     }//GEN-LAST:event_btnEliminarActionPerformed
 
-    // Método para agregar un MouseListener a la tabla de productos
-    private void agregarListenerTablaProductos(JTable tbProductos) {
-        tbProductos.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                // Obtener la fila seleccionada
-                int filaSeleccionada = tbProductos.getSelectedRow();
-
-                // Verificar si hay una fila seleccionada
-                if (filaSeleccionada != -1) {
-                    // Llenar los campos de texto con los datos del producto seleccionado
-                    txtProducto.setText(tbProductos.getValueAt(filaSeleccionada, 1).toString()); // Columna "producto"
-                    txtCantidad.setText(tbProductos.getValueAt(filaSeleccionada, 3).toString()); // Columna "cantidad"
-                    txtPrecio.setText(tbProductos.getValueAt(filaSeleccionada, 2).toString());   // Columna "precio"
-                    txtCodigo.setText(tbProductos.getValueAt(filaSeleccionada, 4).toString());   // Columna "codigo"
-                }
-            }
-        });
-    }
-
     // Metodo para modificar un producto selecionado
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         // Obtener los datos del formulario
@@ -374,9 +471,6 @@ public class FormRegistroProductos extends javax.swing.JFrame {
             int idProducto = productoCtrl.obtenerIdProductoSeleccionado(tbProductos);
 
             if (idProducto != -1) {
-                // Calcular el total (precio * cantidad)
-                double total = producto.getCantidad() * producto.getPrecio();
-                producto.setTotal(total);
                 producto.setId(idProducto);
 
                 // Llamar al método del controlador para modificar el producto
@@ -397,44 +491,89 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnModificarActionPerformed
 
+    private void btnImportarExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportarExcelActionPerformed
+        // Seleccionar el archivo Excel
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Seleccionar archivo Excel");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int seleccion = fileChooser.showOpenDialog(this);
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            File archivoSeleccionado = fileChooser.getSelectedFile();
+            String rutaExcel = archivoSeleccionado.getAbsolutePath();
+
+            // Configurar nombre de la base de datos y tabla
+            String nombreBD = "db.db";
+            String nombreTabla = "productos";
+
+            // Llamar al método de importación
+            ExcelSQLiteManager.importarExcel(rutaExcel, nombreBD, nombreTabla);
+            JOptionPane.showMessageDialog(this, "Importación completada.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            productoCtrl.mostrarProductos(tbProductos);
+        } else {
+            JOptionPane.showMessageDialog(this, "Importación cancelada.", "Cancelado", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnImportarExcelActionPerformed
+
+    private void btnExportarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportarActionPerformed
+        // Nombre de la tabla en SQLite que deseas exportar
+        String nombreTabla = "productos";
+
+        // Configurar el JFileChooser para seleccionar la ubicación y nombre del archivo a exportar
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Guardar archivo Excel");
+
+        // Configurar para que solo permita elegir archivos (sin abrir carpetas)
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        // Definir el archivo con extensión .xlsx por defecto
+        fileChooser.setSelectedFile(new File("archivo_exportado.xlsx"));
+
+        int seleccion = fileChooser.showSaveDialog(this);
+
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            // Obtener la ruta seleccionada por el usuario
+            File archivoSeleccionado = fileChooser.getSelectedFile();
+            String rutaExcel = archivoSeleccionado.getAbsolutePath();
+
+            // Verificar y agregar la extensión .xlsx si no está incluida
+            if (!rutaExcel.toLowerCase().endsWith(".xlsx")) {
+                rutaExcel += ".xlsx";
+            }
+
+            // Llamar al método de exportación
+            ExcelSQLiteManager.exportarDatosAExcel(nombreTabla, rutaExcel);
+
+            // Mostrar mensaje de confirmación
+            JOptionPane.showMessageDialog(this, "Datos exportados exitosamente a " + rutaExcel, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Exportación cancelada.", "Cancelado", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnExportarActionPerformed
+
+    private void ListCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ListCategoriaActionPerformed
+        String categoriaSelecionada = (String) ListCategoria.getSelectedItem();
+        filtrarPorCategoria(categoriaSelecionada);
+    }//GEN-LAST:event_ListCategoriaActionPerformed
+
+    // Metodo para filtrar y acctualizar la tabla productos
+    private void filtrarPorCategoria(String categoria) {
+        productoCtrl.mostrarProductosPorCategoria(tbProductos, categoria);
+    }
+
     // Metodo para Limpiar el formulario  
     private void limpiarFormulario() {
         txtProducto.setText("");
         txtCantidad.setText("");
         txtPrecio.setText("");
         txtCodigo.setText("");
+        txtCategoria.setText("");
     }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FormRegistroProductos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FormRegistroProductos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FormRegistroProductos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FormRegistroProductos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -444,21 +583,32 @@ public class FormRegistroProductos extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> ListCategoria;
     private javax.swing.JButton btnEliminar;
+    private javax.swing.JButton btnExportar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnImportarExcel;
     private javax.swing.JButton btnMenuPricipal;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JTable tbProductos;
     private javax.swing.JTextField txtCantidad;
+    private javax.swing.JTextField txtCategoria;
     private javax.swing.JTextField txtCodigo;
     private javax.swing.JTextField txtPrecio;
     private javax.swing.JTextField txtProducto;

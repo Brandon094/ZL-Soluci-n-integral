@@ -13,7 +13,9 @@ package com.mycompany.zl_solucion_integral.controllers;
 import com.mycompany.zl_solucion_integral.config.ConexionDB;
 import com.mycompany.zl_solucion_integral.models.Producto;
 import com.mycompany.zl_solucion_integral.models.Sesion;
+import com.mycompany.zl_solucion_integral.models.Usuario;
 import com.mycompany.zl_solucion_integral.models.Venta;
+import com.mycompany.zl_solucion_integral.vistas.FormRegistroVentas;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,14 +34,16 @@ import javax.swing.table.DefaultTableModel;
 relacionadas con las ventas en la base de datos*/
 public class VentasController {
 
+    private final Usuario cliente;
     private final ConexionDB conexion; // Variable global para la conexión
     private final Logger logger = Logger.getLogger(VentasController.class.getName());
     private final Sesion sesion;
 
     // Constructor
-    public VentasController() {
+    public VentasController(Usuario cliente, Sesion sesion) {
         this.conexion = new ConexionDB(); // Instancia de la clase de conexión        
-        this.sesion = null;
+        this.sesion = sesion;
+        this.cliente = cliente;
     }
 
     // Método para guardar venta
@@ -55,51 +59,64 @@ public class VentasController {
         ResultSet generatedKeys = null;
 
         try {
+            // Establecer conexión y preparar transacción
             conn = conexion.establecerConexion();
-            conn.setAutoCommit(false);  // Iniciar transacción
+            conn.setAutoCommit(false);
 
-            // Insertar venta general
-            psVenta = conn.prepareStatement(sqlInsertVenta, Statement.RETURN_GENERATED_KEYS);
-            psVenta.setString(1, venta.getNameCliente()); // Cliente
-            psVenta.setString(2, venta.getNoCcCliente()); // CC del cliente
-            psVenta.setString(3, sesion.getUsuarioLogueado()); // Vendedor
-            psVenta.setDate(4, java.sql.Date.valueOf(venta.getFecha())); // Fecha
-            psVenta.setDouble(5, venta.getTotal()); // Total
-
-            psVenta.executeUpdate();
-            generatedKeys = psVenta.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                int ventaId = generatedKeys.getInt(1);
-
-                // Insertar cada producto en detalles_venta y actualizar stock
-                psDetalle = conn.prepareStatement(sqlInsertDetalleVenta);
-                psStock = conn.prepareStatement(sqlUpdateStock);
-
-                for (Producto producto : productosVendidos) {
-                    // Detalles de cada producto vendido
-                    psDetalle.setInt(1, ventaId);
-                    psDetalle.setString(2, producto.getProducto());
-                    psDetalle.setInt(3, producto.getCantidad());
-                    psDetalle.setString(4, producto.getCodigo());
-                    psDetalle.setDouble(5, producto.getPrecio());
-                    psDetalle.setDouble(6, producto.getPrecio() * producto.getCantidad());
-                    psDetalle.executeUpdate();
-
-                    // Actualizar stock del producto
-                    psStock.setInt(1, producto.getCantidad());
-                    psStock.setString(2, producto.getCodigo());
-                    psStock.setInt(3, producto.getCantidad());
-                    if (psStock.executeUpdate() == 0) {
-                        throw new SQLException("No hay suficiente stock para el producto: " + producto.getProducto());
-                    }
+            // Verificar stock de productos antes de comenzar
+            for (Producto producto : productosVendidos) {
+                if (producto.getCantidad() < producto.getCantidadSolicitada()) {
+                    throw new SQLException("Stock insuficiente para el producto: " + producto.getProducto()
+                            + ". Disponible: " + producto.getCantidad()
+                            + ", solicitado: " + producto.getCantidadSolicitada());
                 }
             }
 
-            conn.commit(); // Confirmar transacción
+            // Insertar venta general
+            psVenta = conn.prepareStatement(sqlInsertVenta, Statement.RETURN_GENERATED_KEYS);
+            psVenta.setString(1, venta.getCliente().getNombre());
+            psVenta.setString(2, venta.getCliente().getNoCc());
+            psVenta.setString(3, venta.getVendedor());
+            psVenta.setDate(4, java.sql.Date.valueOf(venta.getFecha()));
+            psVenta.setDouble(5, venta.getTotal());
+
+            psVenta.executeUpdate();
+            generatedKeys = psVenta.getGeneratedKeys();
+            if (!generatedKeys.next()) {
+                throw new SQLException("No se pudo obtener el ID de la venta.");
+            }
+            int ventaId = generatedKeys.getInt(1);
+
+            // Insertar detalles de venta y actualizar stock
+            psDetalle = conn.prepareStatement(sqlInsertDetalleVenta);
+            psStock = conn.prepareStatement(sqlUpdateStock);
+
+            for (Producto producto : productosVendidos) {
+                // Insertar en detalles_venta
+                psDetalle.setInt(1, ventaId);
+                psDetalle.setString(2, producto.getProducto());
+                psDetalle.setInt(3, producto.getCantidad());
+                psDetalle.setString(4, producto.getCodigo());
+                psDetalle.setDouble(5, producto.getPrecio());
+                psDetalle.setDouble(6, producto.getPrecio() * producto.getCantidad());
+                psDetalle.executeUpdate();
+
+                // Actualizar stock del producto
+                psStock.setInt(1, producto.getCantidad());
+                psStock.setString(2, producto.getCodigo());
+                psStock.setInt(3, producto.getCantidad());
+                if (psStock.executeUpdate() == 0) {
+                    throw new SQLException("Error al actualizar stock para el producto: " + producto.getProducto());
+                }
+            }
+
+            // Confirmar transacción
+            conn.commit();
             JOptionPane.showMessageDialog(null, "Venta guardada y stock actualizado exitosamente.");
             MostrarVentas(tablaVentas);
 
         } catch (SQLException e) {
+            // Revertir transacción en caso de error
             if (conn != null) {
                 try {
                     conn.rollback();
@@ -110,6 +127,7 @@ public class VentasController {
             logger.log(Level.SEVERE, "Error al procesar la venta", e);
             JOptionPane.showMessageDialog(null, "Error al procesar venta: " + e.getMessage());
         } finally {
+            // Cerrar recursos
             try {
                 if (generatedKeys != null) {
                     generatedKeys.close();
@@ -125,15 +143,15 @@ public class VentasController {
                 }
                 if (conn != null) {
                     conn.setAutoCommit(true);
+                    conexion.cerrarConexion();
                 }
-                conexion.cerrarConexion();
             } catch (SQLException ex) {
                 logger.log(Level.SEVERE, "Error al cerrar conexiones", ex);
             }
         }
     }
-    // Metodo para modificar una venta
 
+    // Metodo para modificar una venta
     public void modificarVenta(final Venta venta, int idVenta, JTable tablaVentas) {
         String sqlUpdateVenta = "UPDATE ventas SET producto = ?, cantidad = ?, codigo = ?, precio = ?, cliente = ?, cc_cliente = ?, vendedor = ?, fecha = ?, total = ? WHERE id = ?";
         String sqlUpdateStockRestaurar = "UPDATE productos SET cantidad = cantidad + ? WHERE codigo = ?";  // Para restaurar el stock antiguo
@@ -171,8 +189,8 @@ public class VentasController {
             psVenta.setInt(2, venta.getCantidad());  // Nueva cantidad
             psVenta.setString(3, venta.getCodigo());  // Código del producto
             psVenta.setDouble(4, venta.getProducto().getPrecio());  // Precio
-            psVenta.setString(5, venta.getNameCliente());  // Cliente
-            psVenta.setString(6, venta.getNoCcCliente());  // CC Cliente
+            psVenta.setString(5, cliente.getNombre());  // Cliente
+            psVenta.setString(6, cliente.getNoCc());  // CC Cliente
             psVenta.setString(7, sesion.getUsuarioLogueado());  // Vendedor
             psVenta.setDate(8, java.sql.Date.valueOf(venta.getFecha()));  // Fecha
             psVenta.setDouble(9, venta.getTotal());  // Total

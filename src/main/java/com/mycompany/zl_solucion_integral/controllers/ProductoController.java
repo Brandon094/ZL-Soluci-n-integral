@@ -49,7 +49,7 @@ public class ProductoController {
         String sqlUpdate = "UPDATE productos SET cantidad = ? WHERE codigo = ?";
 
         // Consulta SQL para insertar un nuevo producto si no existe en la base de datos
-        String sqlInsert = "INSERT INTO productos (producto, precio, cantidad, codigo, total) VALUES (?, ?, ?, ?, ?)";
+        String sqlInsert = "INSERT INTO productos (producto, precio, cantidad, codigo, categoria) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = conexion.establecerConexion()) {
 
@@ -71,6 +71,7 @@ public class ProductoController {
                     try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdate)) {
                         pstmtUpdate.setInt(1, nuevaCantidad);  // Establecer la nueva cantidad
                         pstmtUpdate.setString(2, producto.getCodigo());  // Establecer el código del producto
+                        pstmtUpdate.setString(5, producto.getCategoria());
 
                         pstmtUpdate.executeUpdate();  // Ejecutar la actualización en la base de datos
                         JOptionPane.showMessageDialog(null, "Stock actualizado exitosamente.");
@@ -82,7 +83,7 @@ public class ProductoController {
                         pstmtInsert.setDouble(2, producto.getPrecio());  // Establecer el precio del producto
                         pstmtInsert.setInt(3, producto.getCantidad());  // Establecer la cantidad del producto
                         pstmtInsert.setString(4, producto.getCodigo());  // Establecer el código del producto
-                        pstmtInsert.setDouble(5, producto.getTotal());  // Establecer el total del producto
+                        pstmtInsert.setString(5, producto.getCategoria());  // Establecer la categoria del producto
 
                         pstmtInsert.executeUpdate();  // Ejecutar la inserción en la base de datos
                         JOptionPane.showMessageDialog(null, "Producto guardado exitosamente.");
@@ -113,7 +114,7 @@ public class ProductoController {
         String sqlCheck = "SELECT COUNT(*) FROM productos WHERE codigo = ? AND id != ?";
 
         // Consulta SQL para actualizar los datos del producto en la base de datos
-        String sqlUpdate = "UPDATE productos SET producto = ?, precio = ?, cantidad = ?, codigo = ? WHERE id = ?";
+        String sqlUpdate = "UPDATE productos SET producto = ?, precio = ?, cantidad = ?, codigo = ?, categoria = ? WHERE id = ?";
 
         try (Connection conn = conexion.establecerConexion()) {
 
@@ -138,7 +139,8 @@ public class ProductoController {
                 pstmtUpdate.setDouble(2, producto.getPrecio());  // Establece el nuevo precio del producto
                 pstmtUpdate.setInt(3, producto.getCantidad());  // Establece la nueva cantidad del producto
                 pstmtUpdate.setString(4, producto.getCodigo());  // Establece el nuevo código del producto
-                pstmtUpdate.setInt(5, producto.getId());  // Establece el ID del producto que se va a actualizar
+                pstmtUpdate.setString(5, producto.getCategoria()); // Esatablecer la nueva categoria
+                pstmtUpdate.setInt(6, producto.getId());  // Establece el ID del producto que se va a actualizar
 
                 // Ejecutar la actualización
                 pstmtUpdate.executeUpdate();
@@ -300,6 +302,17 @@ public class ProductoController {
      * @param tablaProductos La tabla (`JTable`) donde se mostrarán los
      * productos.
      */
+    /**
+     * Método para mostrar todos los productos en una tabla.
+     *
+     * Este método realiza una consulta a la base de datos para obtener todos
+     * los productos almacenados y los muestra en una tabla gráfica (`JTable`).
+     * Se actualiza la tabla con las columnas de "Id", "Producto", "Precio",
+     * "Cantidad", "Código", "Categoría" y "Precio Total".
+     *
+     * @param tablaProductos La tabla (`JTable`) donde se mostrarán los
+     * productos.
+     */
     public void mostrarProductos(final JTable tablaProductos) {
         // Crear un nuevo modelo de tabla
         final DefaultTableModel modelo = new DefaultTableModel();
@@ -310,10 +323,31 @@ public class ProductoController {
         modelo.addColumn("Precio");
         modelo.addColumn("Cantidad");
         modelo.addColumn("Código");
-        modelo.addColumn("Precio Total");
+        modelo.addColumn("Categoría");
 
         // Establecer el modelo de tabla vacío antes de cargar los datos
         tablaProductos.setModel(modelo);
+
+        // Establecer el ancho de la columna "Id"
+        tablaProductos.getColumnModel().getColumn(0).setMinWidth(45); // Tamaño mínimo
+        tablaProductos.getColumnModel().getColumn(0).setPreferredWidth(50); // Tamaño preferido
+        tablaProductos.getColumnModel().getColumn(0).setMaxWidth(70); // Tamaño máximo       
+        // Establecer el ancho de la columna "Producto"
+        tablaProductos.getColumnModel().getColumn(1).setMinWidth(250); // Tamaño mínimo
+        tablaProductos.getColumnModel().getColumn(1).setPreferredWidth(300); // Tamaño predefinido
+        tablaProductos.getColumnModel().getColumn(1).setMaxWidth(350); // Tamaño maximo
+        // Establecer el ancho de la columna "Precio"
+        tablaProductos.getColumnModel().getColumn(2).setMinWidth(70); // Tamaño mínimo
+        tablaProductos.getColumnModel().getColumn(2).setPreferredWidth(100); // Tamaño predefinido
+        tablaProductos.getColumnModel().getColumn(2).setMaxWidth(130); // Tamaño maximo
+        // Establecer el ancho de la columna "Cantidad"
+        tablaProductos.getColumnModel().getColumn(3).setMinWidth(50); // Tamaño mínimo
+        tablaProductos.getColumnModel().getColumn(3).setPreferredWidth(80); // Tamaño predefinido
+        tablaProductos.getColumnModel().getColumn(3).setMaxWidth(100); // Tamaño maximo
+        // Establecer el ancho de la columna "Codigo"
+        tablaProductos.getColumnModel().getColumn(4).setMinWidth(50); // Tamaño mínimo
+        tablaProductos.getColumnModel().getColumn(4).setPreferredWidth(100); // Tamaño predefinido
+        tablaProductos.getColumnModel().getColumn(4).setMaxWidth(150); // Tamaño maximo
 
         // Consulta SQL para obtener todos los productos
         final String sql = "SELECT * FROM productos";
@@ -326,7 +360,6 @@ public class ProductoController {
             while (rs.next()) {
                 double precio = rs.getDouble("precio");  // Obtener el precio del producto
                 int cantidad = rs.getInt("cantidad");  // Obtener la cantidad en stock
-                double precioTotal = precio * cantidad;  // Calcular el precio total (precio * cantidad)
 
                 // Agregar una nueva fila al modelo con los datos del producto
                 modelo.addRow(new Object[]{
@@ -335,7 +368,7 @@ public class ProductoController {
                     precio, // Precio unitario
                     cantidad, // Cantidad en stock
                     rs.getString("codigo"), // Código del producto
-                    precioTotal // Precio total
+                    rs.getString("categoria"), // Categoría del producto
                 });
             }
             // Asignar el modelo a la tabla para mostrar los productos
@@ -346,6 +379,39 @@ public class ProductoController {
             JOptionPane.showMessageDialog(null, "Error al mostrar productos: " + e.getMessage());
         } finally {
             conexion.cerrarConexion();
+        }
+    }
+
+    // Metodo para filtar los productos por categorias
+    public void mostrarProductosPorCategoria(javax.swing.JTable tabla, String categoria) {
+        DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
+        modelo.setRowCount(0); // Limpia la tabla antes de agregar los resultados
+
+        String query = "SELECT * FROM productos";
+        if (!categoria.equals("Todas")) { // Si no es "Todas", filtra por la categoría
+            query += " WHERE categoria = ?";
+        }
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            if (!categoria.equals("Todas")) {
+                stmt.setString(1, categoria);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Object[] fila = {
+                    rs.getInt("Id"),
+                    rs.getString("producto"),
+                    rs.getDouble("precio"),
+                    rs.getInt("cantidad"),
+                    rs.getString("codigo"),
+                    rs.getString("categoria")
+                };
+                modelo.addRow(fila);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al filtrar productos por categoría: " + e.getMessage());
         }
     }
 
@@ -443,8 +509,7 @@ public class ProductoController {
                             rs.getString("producto"),
                             rs.getDouble("precio"),
                             rs.getInt("cantidad"),
-                            rs.getString("codigo"),
-                            rs.getDouble("total")
+                            rs.getString("codigo")
                     );
                 }
             }
@@ -474,8 +539,7 @@ public class ProductoController {
                             rs.getString("producto"),
                             rs.getDouble("precio"),
                             rs.getInt("cantidad"),
-                            rs.getString("codigo"),
-                            rs.getDouble("total")
+                            rs.getString("codigo")
                     );
                 }
             }
@@ -487,5 +551,19 @@ public class ProductoController {
             conexion.cerrarConexion();
         }
         return producto;
+    }
+
+    public void actualizarCantidadProducto(String codigoProducto, int nuevaCantidad) {
+        // Actualiza la cantidad del producto en la base de datos
+        String query = "UPDATE productos SET cantidad = ? WHERE codigo = ?";
+        try (Connection conn = conexion.establecerConexion(); // Utiliza ConexionDB para obtener la conexión
+                 PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, nuevaCantidad);
+            stmt.setString(2, codigoProducto);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al actualizar la cantidad del producto en inventario");
+        }
     }
 }

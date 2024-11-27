@@ -1,16 +1,19 @@
 package com.mycompany.zl_solucion_integral.vistas;
 
 // @author Dazac
+import com.mycompany.zl_solucion_integral.config.Listener;
 import com.mycompany.zl_solucion_integral.config.UtilVentanas;
 import com.mycompany.zl_solucion_integral.controllers.UsuarioController;
 import com.mycompany.zl_solucion_integral.models.Usuario;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
+import javax.swing.JTextField;
 
 public class FormRegistroUsuarios extends javax.swing.JFrame {
 
     // Instancia del controlador del usuario
     UsuarioController usuarioCtrl = new UsuarioController();
+
+    Listener listenerTb = new Listener();
 
     // Constructor           
     public FormRegistroUsuarios() {
@@ -19,8 +22,15 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
         UtilVentanas.aplicarPantallaCompleta(this);
         // Mostrar los datos 
         usuarioCtrl.mostrarUsuarios(tbUsuarios);
-        // inicializar el metodo para obtener los datos del usuario selecionado
-        agregarListenerTablaUsuarios(tbUsuarios);
+
+        // Crear los campos de texto a llenar con los datos de la fila seleccionada
+        JTextField[] camposTexto = {txtNombre, txtTelefono, txtEmail, txtRol, txtContraseña};
+
+        // Definir los índices de las columnas que quieres mostrar en los campos de texto
+        int[] columnas = {1, 3, 2, 4, 5}; // Suponiendo que las columnas son: Nombre, Cantidad, Precio, Código
+
+        // Inicializar el método para obtener los datos del producto seleccionado
+        listenerTb.agregarListenerTabla(tbUsuarios, camposTexto, columnas);
     }
 
     // Método para obtener los datos del formulario
@@ -64,12 +74,15 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         txtRol = new javax.swing.JTextField();
         jSeparator3 = new javax.swing.JSeparator();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbUsuarios = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         btnCerrar = new javax.swing.JButton();
         btnMenuPrincipal = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
+        jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -132,36 +145,44 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
         jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel6.setText("Ingrese el rol:");
 
+        jLabel7.setText("Ingrese 1 para rol de Administrador, 0 para rol de vendedor");
+
+        jLabel8.setText("1 o 0");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator3, javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnGuardarUsuario, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
                             .addComponent(jLabel5)
                             .addComponent(jLabel3)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel6))
+                            .addComponent(jLabel2))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtTelefono)
-                            .addComponent(txtNombre, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtContraseña)
                             .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtRol)))
+                            .addComponent(txtNombre)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnModificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(btnEliminar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnModificar, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnGuardarUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addGap(63, 63, 63)
+                        .addComponent(txtRol)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel8)
+                        .addGap(51, 51, 51))
+                    .addComponent(jLabel7))
                 .addContainerGap())
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -170,31 +191,34 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtTelefono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(29, 29, 29)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtContraseña, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRol, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
-                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnGuardarUsuario)
                 .addGap(18, 18, 18)
+                .addComponent(jLabel7)
+                .addGap(9, 9, 9)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtRol, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnGuardarUsuario)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnEliminar)
                     .addComponent(btnModificar))
-                .addGap(16, 16, 16))
+                .addGap(26, 26, 26))
         );
 
         tbUsuarios.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -217,7 +241,7 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
         jLabel1.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         btnCerrar.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
-        btnCerrar.setText("Cerrar secion");
+        btnCerrar.setText("Cerrar sesìon");
         btnCerrar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCerrarActionPerformed(evt);
@@ -236,20 +260,20 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(jSeparator1)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCerrar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1)
-                .addContainerGap())
-            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(413, 413, 413)
-                .addComponent(jLabel1)
-                .addContainerGap(452, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnCerrar, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 656, Short.MAX_VALUE)
+                        .addGap(17, 17, 17))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -259,15 +283,17 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnMenuPrincipal)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCerrar))
                     .addComponent(jScrollPane1))
-                .addContainerGap())
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(43, Short.MAX_VALUE))
         );
 
         pack();
@@ -367,27 +393,6 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnModificarActionPerformed
 
-    // Método para agregar un MouseListener a la tabla
-    private void agregarListenerTablaUsuarios(JTable tbUsuarios) {
-        tbUsuarios.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                // Obtener la fila seleccionada
-                int filaSeleccionada = tbUsuarios.getSelectedRow();
-
-                // Verificar si hay una fila seleccionada
-                if (filaSeleccionada != -1) {
-                    // Llenar los campos de texto con los datos del usuario seleccionado
-                    txtNombre.setText(tbUsuarios.getValueAt(filaSeleccionada, 1).toString()); // Columna "Nombre"
-                    txtTelefono.setText(tbUsuarios.getValueAt(filaSeleccionada, 3).toString()); // Columna "Teléfono"
-                    txtEmail.setText(tbUsuarios.getValueAt(filaSeleccionada, 2).toString()); // Columna "Email"
-                    txtRol.setText(tbUsuarios.getValueAt(filaSeleccionada, 4).toString()); // Columna "Rol"
-                    txtContraseña.setText(tbUsuarios.getValueAt(filaSeleccionada, 5).toString()); // Columna "Contraseña"
-                }
-            }
-        });
-    }
-
     private void txtContraseñaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtContraseñaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtContraseñaActionPerformed
@@ -457,8 +462,11 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JTable tbUsuarios;

@@ -7,51 +7,41 @@ public class Venta {
     // Atributos
     private int id;
     private String codigo;
-    private int cantidad;
-    private LocalDate fecha;  // Cambiado a LocalDate
-    private String nameCliente;
-    private String noCcCliente;
+    private int cantidad; // Cantidad solicitada por el cliente
+    private LocalDate fecha;
     private Producto producto;
     private double descuento;
     private double total;
-    private String vendedor;  // Agregado para almacenar el vendedor
+    private Usuario cliente;
+    private String vendedor; // Vendedor responsable de la venta
+    private int cantidadDisponible; // Cantidad restante en inventario después de la venta
 
     // Constructor vacío
     public Venta() {
     }
 
+    // Constructor básico
+    public Venta(Producto producto, Usuario cliente, String vendedor) {
+        this.producto = producto;
+        this.cliente = cliente;
+        this.vendedor = vendedor;
+    }
+
     // Constructor completo
-    public Venta(String codigo, Producto producto, int cantidad, String nameCliente, String noCcCliente, LocalDate fecha, String vendedor, double total, double descuento) {
+    public Venta(String codigo, Producto producto, int cantidad, LocalDate fecha, String vendedor, double total, double descuento, int cantidadDisponible) {
         this.codigo = codigo;
         this.producto = producto;
         this.cantidad = cantidad;
-        this.nameCliente = nameCliente;
-        this.noCcCliente = noCcCliente;
         this.fecha = fecha;
-        this.vendedor = vendedor;  // Inicialización del vendedor
+        this.vendedor = vendedor;
         this.total = total;
         this.descuento = descuento;
+        this.cantidadDisponible = cantidadDisponible;
     }
 
     // Getters y Setters
     public int getId() {
         return id;
-    }
-
-    public double getDescuento() {
-        return descuento;
-    }
-
-    public void setDescuento(double descuento) {
-        this.descuento = descuento;
-    }
-
-    public double getTotal() {
-        return total;
-    }
-
-    public void setTotal(double total) {
-        this.total = total;
     }
 
     public void setId(int id) {
@@ -82,22 +72,6 @@ public class Venta {
         this.fecha = fecha;
     }
 
-    public String getNameCliente() {
-        return nameCliente;
-    }
-
-    public void setNameCliente(String nameCliente) {
-        this.nameCliente = nameCliente;
-    }
-
-    public String getNoCcCliente() {
-        return noCcCliente;
-    }
-
-    public void setNoCcCliente(String noCcCliente) {
-        this.noCcCliente = noCcCliente;
-    }
-
     public Producto getProducto() {
         return producto;
     }
@@ -106,12 +80,30 @@ public class Venta {
         this.producto = producto;
     }
 
-    // Nuevo método para obtener el precio del producto
-    public double getPrecio() {
-        return this.producto.getPrecio();  // Suponiendo que Producto tiene un método getPrecio()
+    public double getDescuento() {
+        return descuento;
     }
 
-    // Nuevo método para obtener el vendedor
+    public void setDescuento(double descuento) {
+        this.descuento = descuento;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public Usuario getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Usuario cliente) {
+        this.cliente = cliente;
+    }
+
     public String getVendedor() {
         return vendedor;
     }
@@ -120,19 +112,44 @@ public class Venta {
         this.vendedor = vendedor;
     }
 
+    public int getCantidadDisponible() {
+        return cantidadDisponible;
+    }
+
+    public void setCantidadDisponible(int cantidadDisponible) {
+        this.cantidadDisponible = cantidadDisponible;
+    }
+
+    // Métodos adicionales para claridad
+    public double getPrecio() {
+        return producto != null ? producto.getPrecio() : 0.0; // Precio del producto
+    }
+
+    public double calcularSubtotal() {
+        return getPrecio() * cantidad; // Subtotal sin descuento
+    }
+
+    public double calcularDescuento() {
+        return calcularSubtotal() * (descuento / 100); // Monto de descuento
+    }
+
+    public double calcularTotal() {
+        return calcularSubtotal() - calcularDescuento(); // Total final
+    }
+
+    // Representación en texto
     @Override
     public String toString() {
         return "Venta{"
                 + "codigo='" + codigo + '\''
-                + ", cantidad=" + cantidad
+                + ", cantidadSolicitada=" + cantidad
+                + ", cantidadDisponible=" + cantidadDisponible
                 + ", fecha=" + fecha
-                + ", cliente='" + nameCliente + '\''
-                + ", noCcCliente='" + noCcCliente + '\''
-                + ", producto=" + producto.getProducto()
+                + ", producto=" + (producto != null ? producto.getProducto() : "N/A")
                 + ", vendedor='" + vendedor + '\''
                 + ", total=" + total
                 + ", descuento=" + descuento
+                + ", cliente=" + (cliente != null ? cliente.getNombre() : "N/A")
                 + '}';
     }
-
 }

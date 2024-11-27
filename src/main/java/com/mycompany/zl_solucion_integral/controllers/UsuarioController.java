@@ -218,6 +218,20 @@ public class UsuarioController {
 
         tablaUsuarios.setModel(modelo);
 
+        // Establecer el ancho de la columna "Id"
+        tablaUsuarios.getColumnModel().getColumn(0).setMinWidth(45); // Tamaño mínimo
+        tablaUsuarios.getColumnModel().getColumn(0).setPreferredWidth(50); // Tamaño preferido
+        tablaUsuarios.getColumnModel().getColumn(0).setMaxWidth(70); // Tamaño máximo
+        // Establecer el ancho de la columna "Email"
+        tablaUsuarios.getColumnModel().getColumn(2).setMinWidth(200); // Tamaño mínimo
+        tablaUsuarios.getColumnModel().getColumn(2).setPreferredWidth(220); // Tamaño preferido
+        tablaUsuarios.getColumnModel().getColumn(2).setMaxWidth(250); // Tamaño máximo
+        // Establecer el ancho de la columna "Rol"
+        tablaUsuarios.getColumnModel().getColumn(4).setMinWidth(45); // Tamaño mínimo
+        tablaUsuarios.getColumnModel().getColumn(4).setPreferredWidth(50); // Tamaño preferido
+        tablaUsuarios.getColumnModel().getColumn(4).setMaxWidth(50); // Tamaño máximo        
+               
+        
         try (Connection conn = conexion.establecerConexion(); Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {

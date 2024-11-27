@@ -4,7 +4,6 @@ import com.mycompany.zl_solucion_integral.vistas.FormLogIn;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import javax.swing.JOptionPane;
 
 /**
  * Clase para manejar la conexión con la base de datos SQLite.
@@ -47,7 +46,7 @@ public class ConexionDB {
             System.out.println("Se conectó correctamente a la base de datos");
         } catch (Exception e) {
             // Mostrar mensaje de error si la conexión falla
-            JOptionPane.showMessageDialog(log_In, "No se conectó correctamente con la base de datos, error: " + e.toString());
+            System.out.println("No se conectó correctamente con la base de datos, error: " + e.toString());
         }
 
         return conectar;
@@ -67,7 +66,7 @@ public class ConexionDB {
             }
         } catch (Exception e) {
             // Mostrar mensaje de error si ocurre un problema al cerrar la conexión
-            JOptionPane.showMessageDialog(null, "No se cerró correctamente la base de datos, error: " + e.toString());
+            System.out.println("No se cerró correctamente la base de datos, error: " + e.toString());
         }
     }
 
@@ -94,7 +93,7 @@ public class ConexionDB {
             System.out.println("Tabla 'usuarios' verificada o creada correctamente.");
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al crear la tabla 'usuarios': " + e.getMessage());
+            System.out.println("Error al crear la tabla 'usuarios': " + e.getMessage());
         } finally {
             cerrarConexion();
         }
@@ -114,7 +113,7 @@ public class ConexionDB {
                 + "precio REAL NOT NULL,"
                 + "cantidad INTEGER NOT NULL,"
                 + "codigo TEXT NOT NULL,"
-                + "total REAL NOT NULL"
+                + "categoria TEXT"
                 + ");";
 
         try (Connection conn = establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -123,7 +122,7 @@ public class ConexionDB {
             System.out.println("Tabla 'productos' verificada o creada correctamente.");
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al crear la tabla 'productos': " + e.getMessage());
+            System.out.println("Error al crear la tabla 'productos': " + e.getMessage());
         } finally {
             cerrarConexion();
         }
@@ -152,7 +151,7 @@ public class ConexionDB {
             System.out.println("Tabla 'ventas' verificada o creada correctamente.");
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al crear la tabla 'ventas': " + e.getMessage());
+            System.out.println("Error al crear la tabla 'ventas': " + e.getMessage());
         } finally {
             cerrarConexion();
         }
@@ -183,7 +182,7 @@ public class ConexionDB {
             System.out.println("Tabla 'detalles_venta' verificada o creada correctamente.");
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al crear la tabla 'detalles_venta': " + e.getMessage());
+            System.out.println("Error al crear la tabla 'detalles_venta': " + e.getMessage());
         } finally {
             cerrarConexion();
         }
