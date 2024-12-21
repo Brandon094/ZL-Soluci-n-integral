@@ -187,4 +187,37 @@ public class ConexionDB {
             cerrarConexion();
         }
     }
+
+    /**
+     * Crea la tabla 'configuracion' si no existe.
+     *
+     * La tabla 'configuracion' contiene las columnas: id y
+     * ultimoNumeroCotizacion. Esta tabla almacena el último número de
+     * cotización utilizado.
+     */
+    public void crearTablaConfiguracionSiNoExiste() {
+        String sql = "CREATE TABLE IF NOT EXISTS configuracion ("
+                + "id INTEGER PRIMARY KEY,"
+                + "ultimoNumeroCotizacion TEXT"
+                + ");";
+
+        try (Connection conn = establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.execute();
+            System.out.println("Tabla 'configuracion' verificada o creada correctamente.");
+        } catch (Exception e) {
+            System.out.println("Error al crear la tabla 'configuracion': " + e.getMessage());
+        } finally {
+            cerrarConexion();
+        }
+
+        // Inserta un valor inicial en la tabla si no existe
+        String sqlInsert = "INSERT OR IGNORE INTO configuracion (id, ultimoNumeroCotizacion) VALUES (1, '20241212-000');";
+        try (Connection conn = establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sqlInsert)) {
+            pstmt.executeUpdate();
+            System.out.println("Valor inicial establecido en 'configuracion'.");
+        } catch (Exception e) {
+            System.out.println("Error al insertar valor inicial en 'configuracion': " + e.getMessage());
+        }
+    }
+
 }

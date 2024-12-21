@@ -15,6 +15,8 @@ public class Usuario {
     private String contraseña;
     private String rol; // Se puede manejar como String o int según el diseño de tu aplicación
     private String noCc;
+    private String NIT;
+    private String DIR;
 
     // Constructor vacío (útil para instanciar sin datos iniciales)
     public Usuario() {
@@ -87,8 +89,25 @@ public class Usuario {
         this.noCc = noCc;
     }
 
+    public String getNIT() {
+        return NIT;
+    }
+
+    public void setNIT(String NIT) {
+        this.NIT = NIT;
+    }
+
+    public String getDIR() {
+        return DIR;
+    }
+
+    public void setDIR(String DIR) {
+        this.DIR = DIR;
+    }
+
     @Override
     public String toString() {
-        return "Usuario{" + "id=" + id + ", nombre=" + nombre + ", telefono=" + telefono + ", email=" + email + ", contrase\u00f1a=" + contraseña + ", rol=" + rol + ", noCc=" + noCc + '}';
+        return "Usuario{" + "id=" + id + ", nombre=" + nombre + ", telefono=" + telefono + ", email=" + email + ", contrase\u00f1a=" + contraseña + ", rol=" + rol + ", noCc=" + noCc + ", NIT=" + NIT + ", DIR=" + DIR + '}';
     }
+
 }

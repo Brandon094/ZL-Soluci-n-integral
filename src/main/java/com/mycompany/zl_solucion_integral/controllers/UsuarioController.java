@@ -1,3 +1,4 @@
+
 package com.mycompany.zl_solucion_integral.controllers;
 
 import com.mycompany.zl_solucion_integral.config.ConexionDB;
@@ -5,6 +6,7 @@ import com.mycompany.zl_solucion_integral.models.Usuario;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -23,6 +25,7 @@ import java.util.logging.Logger;
  *
  * @author Dazac
  */
+
 public class UsuarioController {
 
     private final ConexionDB conexion = new ConexionDB();
@@ -40,8 +43,8 @@ public class UsuarioController {
      */
     public void agregarUsuario(final Usuario usuario) {
         // Verificar si el usuario ya existe
-        if (validarExistenciaUsuario(usuario.getNombre())) {
-            JOptionPane.showMessageDialog(null, "El usuario con ese nombre ya existe. Por favor, "
+        if (validarExistenciaUsuario(usuario.getNombre()) && usuario.getRol() == "1" && usuario.getRol() == "0") {
+            JOptionPane.showMessageDialog(null, "El usuario administrador o vendedor con ese nombre ya existe. Por favor, "
                     + "elija otro nombre.");
             return; // Detener la ejecución si el usuario ya existe
         }
@@ -208,7 +211,6 @@ public class UsuarioController {
     public void mostrarUsuarios(final JTable tablaUsuarios) {
         final DefaultTableModel modelo = new DefaultTableModel();
         final String sql = "SELECT * FROM usuarios";
-
         modelo.addColumn("Id");
         modelo.addColumn("Usuario");
         modelo.addColumn("Email");
@@ -230,8 +232,7 @@ public class UsuarioController {
         tablaUsuarios.getColumnModel().getColumn(4).setMinWidth(45); // Tamaño mínimo
         tablaUsuarios.getColumnModel().getColumn(4).setPreferredWidth(50); // Tamaño preferido
         tablaUsuarios.getColumnModel().getColumn(4).setMaxWidth(50); // Tamaño máximo        
-               
-        
+
         try (Connection conn = conexion.establecerConexion(); Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
@@ -250,6 +251,49 @@ public class UsuarioController {
             JOptionPane.showMessageDialog(null, "Error al mostrar: " + e.toString());
         } finally {
             conexion.cerrarConexion();
+        }
+    }
+
+    /**
+     * Muestra los usuarios en una tabla, con o sin filtro por rol.
+     *
+     * @param tabla La tabla donde se mostrarán los usuarios.
+     * @param rol El rol por el cual filtrar los usuarios. Si es "Todas",
+     * muestra todos.
+     */
+    public void mostrarUsuariosPorRol(JTable tablaUsuarios, String rolSeleccionado) {
+        DefaultTableModel modelo = (DefaultTableModel) tablaUsuarios.getModel();
+        modelo.setRowCount(0); // Limpia la tabla antes de agregar los resultados
+
+        String query = "SELECT * FROM usuarios";
+        boolean filtrarPorRol = !"Todas".equals(rolSeleccionado);
+
+        if (filtrarPorRol) {
+            query += " WHERE rol = ?";
+        }
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            if (filtrarPorRol) {
+                // Extrae el número del rol del texto seleccionado
+                int rolNumerico = Integer.parseInt(rolSeleccionado.split(":")[0].trim());
+                stmt.setInt(1, rolNumerico);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Object[] fila = {
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getString("email"),
+                    rs.getString("telefono"),
+                    rs.getInt("rol"), // Muestra directamente el número del rol
+                    rs.getString("contraseña")
+
+                };
+                modelo.addRow(fila);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al filtrar usuarios por rol: " + e.getMessage());
         }
     }
 

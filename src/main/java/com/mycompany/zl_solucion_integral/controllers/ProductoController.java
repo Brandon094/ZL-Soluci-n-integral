@@ -52,46 +52,39 @@ public class ProductoController {
         String sqlInsert = "INSERT INTO productos (producto, precio, cantidad, codigo, categoria) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = conexion.establecerConexion()) {
-
             // Verificar si el producto ya existe en la base de datos mediante su código
             try (PreparedStatement pstmtSelect = conn.prepareStatement(sqlSelect)) {
-                // Asignar el código del producto en la consulta
                 pstmtSelect.setString(1, producto.getCodigo());
-                // Ejecutar la consulta para verificar si el producto existe
                 ResultSet rs = pstmtSelect.executeQuery();
 
                 if (rs.next()) {
                     // Si el producto ya existe, obtener la cantidad actual
                     int cantidadActual = rs.getInt("cantidad");
 
-                    // Calcular la nueva cantidad sumando la actual con la cantidad que se va a agregar
+                    // Calcular la nueva cantidad
                     int nuevaCantidad = cantidadActual + producto.getCantidad();
 
-                    // Preparar la consulta para actualizar la cantidad del producto existente
+                    // Actualizar la cantidad del producto existente
                     try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdate)) {
-                        pstmtUpdate.setInt(1, nuevaCantidad);  // Establecer la nueva cantidad
-                        pstmtUpdate.setString(2, producto.getCodigo());  // Establecer el código del producto
-                        pstmtUpdate.setString(5, producto.getCategoria());
-
-                        pstmtUpdate.executeUpdate();  // Ejecutar la actualización en la base de datos
+                        pstmtUpdate.setInt(1, nuevaCantidad);
+                        pstmtUpdate.setString(2, producto.getCodigo());
+                        pstmtUpdate.executeUpdate();
                         JOptionPane.showMessageDialog(null, "Stock actualizado exitosamente.");
                     }
                 } else {
-                    // Si el producto no existe, preparar la consulta para insertar un nuevo producto
+                    // Insertar un nuevo producto
                     try (PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
-                        pstmtInsert.setString(1, producto.getProducto());  // Establecer el nombre del producto
-                        pstmtInsert.setDouble(2, producto.getPrecio());  // Establecer el precio del producto
-                        pstmtInsert.setInt(3, producto.getCantidad());  // Establecer la cantidad del producto
-                        pstmtInsert.setString(4, producto.getCodigo());  // Establecer el código del producto
-                        pstmtInsert.setString(5, producto.getCategoria());  // Establecer la categoria del producto
-
-                        pstmtInsert.executeUpdate();  // Ejecutar la inserción en la base de datos
+                        pstmtInsert.setString(1, producto.getProducto());
+                        pstmtInsert.setDouble(2, producto.getPrecio());
+                        pstmtInsert.setInt(3, producto.getCantidad());
+                        pstmtInsert.setString(4, producto.getCodigo());
+                        pstmtInsert.setString(5, producto.getCategoria());
+                        pstmtInsert.executeUpdate();
                         JOptionPane.showMessageDialog(null, "Producto guardado exitosamente.");
                     }
                 }
             }
         } catch (Exception e) {
-            // Manejo de errores: registrar el error y mostrar un mensaje al usuario
             logger.log(Level.SEVERE, "Error al agregar o actualizar producto", e);
             JOptionPane.showMessageDialog(null, "Error al procesar producto: " + e.getMessage());
         } finally {
@@ -474,7 +467,8 @@ public class ProductoController {
                         rs.getDouble("precio"), // Precio del producto
                         rs.getInt("cantidad"), // Cantidad disponible
                         rs.getString("codigo"), // Código del producto
-                        rs.getDouble("precio") * rs.getInt("cantidad") // Calcular el total (precio * cantidad)
+                        rs.getDouble("precio") * rs.getInt("cantidad"), // Calcular el total (precio * cantidad)
+                        rs.getString("categoria")
                 );
             } else {
                 // Si no se encuentra el producto, mostrar un mensaje de error
@@ -509,7 +503,8 @@ public class ProductoController {
                             rs.getString("producto"),
                             rs.getDouble("precio"),
                             rs.getInt("cantidad"),
-                            rs.getString("codigo")
+                            rs.getString("codigo"),
+                            rs.getString("Categoria")
                     );
                 }
             }
@@ -539,7 +534,8 @@ public class ProductoController {
                             rs.getString("producto"),
                             rs.getDouble("precio"),
                             rs.getInt("cantidad"),
-                            rs.getString("codigo")
+                            rs.getString("codigo"),
+                            rs.getString("categoria")
                     );
                 }
             }

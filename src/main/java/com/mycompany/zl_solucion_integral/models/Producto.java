@@ -21,7 +21,7 @@ public class Producto {
     }
 
     // Constructor con parámetros (para inicializar con datos, incluyendo el total)
-    public Producto(int id, String producto, double precio, int cantidad, String codigo, double total) {
+    public Producto(int id, String producto, double precio, int cantidad, String codigo, double total, String categoria) {
         this();
         this.id = id;
         this.producto = producto;
@@ -29,6 +29,7 @@ public class Producto {
         this.cantidad = cantidad;
         this.codigo = codigo;
         this.total = total;
+        this.categoria = categoria;
     }
 
     // Constructor sin el parametro id 
@@ -127,12 +128,12 @@ public class Producto {
 
     @Override
     public String toString() {
-        return "id=" + id + ", "
-                + "producto=" + producto + ", "
-                + "precio=" + precio + ", "
-                + "cantidad=" + cantidad + ", "
-                + "codigo=" + codigo + ", "
-                + "total=" + total + ", "
-                + "categoria=" + categoria;
+        return "id: " + id
+                + "producto: " + producto
+                + "precio: " + precio
+                + "cantidad: " + cantidad
+                + "codigo: " + codigo
+                + "total: " + total
+                + "categoria: " + categoria;
     }
 }

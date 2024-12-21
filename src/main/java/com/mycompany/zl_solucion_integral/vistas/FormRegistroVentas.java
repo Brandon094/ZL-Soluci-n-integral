@@ -1,18 +1,24 @@
 package com.mycompany.zl_solucion_integral.vistas;
 
+import com.mycompany.zl_solucion_integral.config.EnvioCotizacion;
+import com.mycompany.zl_solucion_integral.config.PantallaCarga;
+import com.mycompany.zl_solucion_integral.config.SelecionRuta;
 import com.mycompany.zl_solucion_integral.config.UtilVentanas;
 import com.mycompany.zl_solucion_integral.controllers.ProductoController;
+import com.mycompany.zl_solucion_integral.controllers.UsuarioController;
 import com.mycompany.zl_solucion_integral.controllers.VentasController;
 import com.mycompany.zl_solucion_integral.models.Producto;
 import com.mycompany.zl_solucion_integral.models.Sesion;
 import com.mycompany.zl_solucion_integral.models.Usuario;
 import com.mycompany.zl_solucion_integral.models.Venta;
-import java.nio.charset.StandardCharsets;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
+
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 /**
  * La clase {registroVentas} representa la interfaz gráfica para el registro,
@@ -35,7 +41,10 @@ public class FormRegistroVentas extends javax.swing.JFrame {
     Usuario cliente = new Usuario();
     Venta venta = new Venta();
     VentasController ventasCtrl = new VentasController(cliente, sesion);
+    UsuarioController usuarioCtrl = new UsuarioController();
     ProductoController productoCtrl = new ProductoController();
+    EnvioCotizacion envioCotizacion = new EnvioCotizacion();
+    private int cantidadDisponibleEnMemoria;
 
     // Define el ArrayList de ventas a nivel de la clase
     private List<Venta> ventasCotizadas = new ArrayList<>();
@@ -60,29 +69,45 @@ public class FormRegistroVentas extends javax.swing.JFrame {
     public FormRegistroVentas(boolean esAdmin) {
         initComponents();
         setTitle("Registro de ventas");
+        this.venta = new Venta();
         listProCotizados.setModel(modeloLista); // Asignar modelo al JList
         UtilVentanas.aplicarPantallaCompleta(this);
+        ventasCtrl.MostrarVentas(tbVentas); // Mostrar las ventas 
         btnMenuPrincipal.setVisible(esAdmin); // Ocultar el boton inicalmente
         tbVentas.setVisible(esAdmin); // Ocultar la tabla inicalmente
-        ventasCtrl.MostrarVentas(tbVentas); // Mostrar las ventas 
         textVendedor.setText("Vendedor: " + vendedor);
     }
 
-    // Método para obtener los datos del formulario 
+    // Método para obtener los datos del formulario
     private Venta obtenerDatosFormulario() {
         try {
             // Obtener los datos del formulario
+            // Datos de producto
             String codigo = txtCodigo.getText().trim();
             String productoName = txtProducto.getText().trim();
             String cantidadStr = txtCantidad.getText().trim();
             String descuentoStr = txtDescuento.getText().trim();
+            // Datos cliente
             String clienteName = txtCliente.getText().trim();
             String noCcCliente = txtNoCc.getText().trim();
             String telefonoCliente = txtTelefonoCliente.getText().trim();
             String correoCliente = txtCorreoCliente.getText().trim();
+            String NIT = txtNit.getText().trim();
+            String DIR = txtDir.getText().trim();
+            // Los datos de contraseña y rol 
+            String contraseña = " ";
+            String rol = "2";
+
+            // Verificar si se seleccionó efectivo o crédito
+            String metodoPago = "Efectivo"; // Valor por defecto
+            if (checkCredito.isSelected()) {
+                metodoPago = "Crédito";  // Si se selecciona el JCheckBox de crédito
+            } else if (checkEfectivo.isSelected()) {
+                metodoPago = "Efectivo";  // Si se selecciona el JCheckBox de efectivo
+            }
 
             // Validar datos
-            if (!validarProducto(codigo, productoName, cantidadStr) || !validarCliente(clienteName, noCcCliente, telefonoCliente, correoCliente)) {
+            if (!validarProducto(codigo, productoName, cantidadStr) || !validarCliente(clienteName, noCcCliente, telefonoCliente, correoCliente, NIT, DIR)) {
                 return null;
             }
 
@@ -95,16 +120,18 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                 return null;
             }
 
-            // Validar cantidad solicitada
+            // Validar cantidad solicitada contra la cantidad disponible en memoria (no la base de datos)
             int cantidadSolicitada = Integer.parseInt(cantidadStr);
-            if (cantidadSolicitada > productoEncontrado.getCantidad()) {
-                JOptionPane.showMessageDialog(this, "La cantidad solicitada supera la cantidad disponible en inventario (" + productoEncontrado.getCantidad() + ").", "Error", JOptionPane.ERROR_MESSAGE);
+
+            cantidadDisponibleEnMemoria = productoEncontrado.getCantidad();
+            if (cantidadSolicitada > cantidadDisponibleEnMemoria) {
+                JOptionPane.showMessageDialog(this, "La cantidad solicitada supera la cantidad disponible en inventario (" + cantidadDisponibleEnMemoria + ").", "Error", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
-            //Variable para mantener la cantidad y restar los q se piden 
-            int cantidadDisponible = productoEncontrado.getCantidad() - cantidadSolicitada;
+            // Acctualizar la cantidad disponible en memoria
+            cantidadDisponibleEnMemoria = cantidadDisponibleEnMemoria - cantidadSolicitada;
 
-            // Calcular total
+            // Calcular total            
             double descuento = descuentoStr.isEmpty() ? 0.0 : Double.parseDouble(descuentoStr);
             double precio = productoEncontrado.getPrecio();
             double total = precio * cantidadSolicitada - (precio * cantidadSolicitada * descuento / 100);
@@ -114,12 +141,27 @@ public class FormRegistroVentas extends javax.swing.JFrame {
             cliente.setNoCc(noCcCliente);
             cliente.setTelefono(telefonoCliente);
             cliente.setEmail(correoCliente);
-            
+            cliente.setNIT(NIT);
+            cliente.setDIR(DIR);
+            cliente.setRol(rol);
+            // crear una contraseña 
+            contraseña = clienteName.replaceAll("\\s+", "") + noCcCliente;
+            // Asigna la contraseña creada
+            cliente.setContraseña(contraseña);
+
+            // Inicializar venta si es null
+            if (venta == null) {
+                venta = new Venta();
+            }
+            venta.setCliente(cliente); // Asegúrate de asignar el cliente a la venta
+
             // Cantidad solicitada
             productoEncontrado.setCantidadSolicitada(cantidadSolicitada);
-            
+
+            // Asignar la forma de pago a la venta
+            venta.setMetodoPago(metodoPago);
             // Retornar venta
-            return new Venta(productoEncontrado.getCodigo(), productoEncontrado, productoEncontrado.getCantidadSolicitada(), LocalDate.now(), vendedor, total, descuento, cantidadDisponible);
+            return new Venta(productoEncontrado.getCodigo(), productoEncontrado, productoEncontrado.getCantidadSolicitada(), LocalDate.now(), vendedor, venta.getCliente(), total, descuento, cantidadDisponibleEnMemoria, metodoPago);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -127,7 +169,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         }
     }
 
-    private boolean validarCliente(String clienteName, String noCcCliente, String telefonoCliente, String correoCliente) {
+    private boolean validarCliente(String clienteName, String noCcCliente, String telefonoCliente, String correoCliente, String NIT, String DIR) {
         if (clienteName.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Debe ingresar el nombre del cliente.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
@@ -148,6 +190,21 @@ public class FormRegistroVentas extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "El correo electrónico no tiene un formato válido.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+        if (NIT.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El NIT no debe estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (DIR.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "La Dirección debe ser llenada.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Validar que se haya seleccionado uno de los métodos de pago
+        if (!checkCredito.isSelected() && !checkEfectivo.isSelected()) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un método de pago (Efectivo o Crédito).", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
         return true;
     }
 
@@ -211,12 +268,22 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         txtCorreoCl = new javax.swing.JLabel();
         txtTelefonoCliente = new javax.swing.JTextField();
         txtCorreoCliente = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        txtNit = new javax.swing.JTextField();
+        txtDir = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        checkEfectivo = new javax.swing.JCheckBox();
+        checkCredito = new javax.swing.JCheckBox();
         jPanel5 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         textNombre = new javax.swing.JLabel();
         textCedula = new javax.swing.JLabel();
         textTelefono = new javax.swing.JLabel();
         textCorreo = new javax.swing.JLabel();
+        textNIT = new javax.swing.JLabel();
+        textDIR = new javax.swing.JLabel();
+        textMetodoPago = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         textVendedor = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
@@ -310,6 +377,16 @@ public class FormRegistroVentas extends javax.swing.JFrame {
             }
         });
 
+        jLabel7.setText("NIT:");
+
+        jLabel9.setText("DIR:");
+
+        jLabel11.setText("Metodo de pago:");
+
+        checkEfectivo.setText("Efectivo");
+
+        checkCredito.setText("Credito");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -317,7 +394,6 @@ public class FormRegistroVentas extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator4)
-                    .addComponent(btnAgregarAlCarrito, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -348,21 +424,36 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtNoTel)
-                                    .addComponent(txtCorreoCl))
+                                    .addComponent(txtCorreoCl)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtNit, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(16, 16, 16)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel9)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtDir))
                                     .addComponent(txtTelefonoCliente)
-                                    .addComponent(txtCorreoCliente))))))
+                                    .addComponent(txtCorreoCliente)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel8)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel11)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(checkCredito)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(checkEfectivo)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(btnAgregarAlCarrito, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel8)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
@@ -398,9 +489,19 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtCorreoCl)
                     .addComponent(txtCorreoCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(22, 22, 22)
-                .addComponent(btnAgregarAlCarrito)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel9)
+                    .addComponent(txtNit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(checkCredito)
+                    .addComponent(checkEfectivo))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnAgregarAlCarrito))
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("CARRITO DE COMPRAS"));
@@ -416,6 +517,12 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
         textCorreo.setText("Email: ");
 
+        textNIT.setText("NIT:");
+
+        textDIR.setText("DIR:");
+
+        textMetodoPago.setText("Metodo de pago: ");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -426,8 +533,11 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                     .addComponent(textNombre)
                     .addComponent(textCedula)
                     .addComponent(textTelefono)
-                    .addComponent(textCorreo))
-                .addContainerGap(200, Short.MAX_VALUE))
+                    .addComponent(textCorreo)
+                    .addComponent(textNIT)
+                    .addComponent(textDIR)
+                    .addComponent(textMetodoPago))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -440,7 +550,12 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                 .addComponent(textTelefono)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(textCorreo)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(textNIT)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(textDIR)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(textMetodoPago))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Informacion de vendedor"));
@@ -459,9 +574,8 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(textVendedor)
-                .addContainerGap(45, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Informacion de producto"));
@@ -552,7 +666,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnLimpiarCarrito, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnLimpiarCarrito, javax.swing.GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -569,7 +683,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -617,16 +731,15 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnMenuPrincipal)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCerrar)))
@@ -663,6 +776,9 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         textCedula.setText("N° Cedula: " + cliente.getNoCc());
         textTelefono.setText("N° telefono: " + cliente.getTelefono());
         textCorreo.setText("Email: " + cliente.getEmail());
+        textNIT.setText("NIT: " + cliente.getNIT());
+        textDIR.setText("DIR: " + cliente.getDIR());
+        textMetodoPago.setText("Metodo de pago: " + venta.getMetodoPago());
 
         for (Venta venta : ventas) {
             modeloLista.addElement(
@@ -683,136 +799,102 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         txtDescuento.setText("");
     }
 
-    // Metodo para agregar los productos al carrito de compras 
-    private void btnAgregarAlCarritoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarAlCarritoActionPerformed
-        venta = obtenerDatosFormulario();
-
-        if (venta != null) {
-            Producto producto = venta.getProducto();
-
-            // Actualizar la cantidad disponible del producto en el inventario
-            int nuevaCantidad = producto.getCantidad() - venta.getCantidad();
-            producto.setCantidad(nuevaCantidad);
-            System.out.println("Nueva cantidad: "+ nuevaCantidad + " Cantidad solicitada: "+ producto.getCantidadSolicitada());
-            // Agregar la venta y actualizar las listas
-            ventasCotizadas.add(venta);
-            productosVendidos.add(producto); // Aquí ya tiene la cantidad ajustada
-            mostrarInformacionCotizacion(ventasCotizadas);
-
-            JOptionPane.showMessageDialog(this, "Producto agregado al carrito con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            limpiarCajas();
-        } else {
-            JOptionPane.showMessageDialog(this, "Por favor, completa todos los campos requeridos.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }//GEN-LAST:event_btnAgregarAlCarritoActionPerformed
-
-    private void txtClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtClienteActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtClienteActionPerformed
-    // Metodo para generar un mensaje para la cotizacion
-    private String generarMensajeCotizacion() {
-        StringBuilder mensaje = new StringBuilder();
-        mensaje.append("Cotización\n");
-        mensaje.append("Cliente: ").append(cliente.getNombre()).append("\n");
-        mensaje.append("Cédula: ").append(cliente.getNoCc()).append("\n");
-        mensaje.append("Teléfono: ").append(cliente.getTelefono()).append("\n");
-        mensaje.append("Correo: ").append(cliente.getEmail()).append("\n\n");
-        mensaje.append("Productos:\n");
-
-        for (Venta venta : ventasCotizadas) {
-            mensaje.append("- Producto: ").append(venta.getProducto().getProducto()).append("\n")
-                    .append("  Código: ").append(venta.getProducto().getCodigo()).append("\n")
-                    .append("  Cantidad: ").append(venta.getCantidad()).append("\n")
-                    .append("  Total: $").append(String.format("%.2f", venta.getTotal())).append("\n\n");
-        }
-
-        mensaje.append("Total General: $").append(textValorTotal.getText().replace("Precio Total: ", ""));
-        return mensaje.toString();
-    }
-
-    // Enviar cotizacion por WhatsApp
-    private void enviarPorWhatsApp(String telefono) {
-        if (telefono.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El número de teléfono no está especificado.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        String mensaje = generarMensajeCotizacion();
-        String url = "https://wa.me/+57" + telefono + "?text=" + java.net.URLEncoder.encode(mensaje, StandardCharsets.UTF_8);
-        try {
-            java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "No se pudo abrir WhatsApp: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    // Enviar Cotizacion por correo electronico
-//    private void enviarPorCorreo(String email) {
-//        if (email.isEmpty()) {
-//            JOptionPane.showMessageDialog(this, "El correo electrónico no está especificado.", "Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//
-//        String mensaje = generarMensajeCotizacion();
-//        String asunto = "Cotización de Productos";
-//
-//        try {
-//            Session session = configurarSesionSMTP();
-//
-//            javax.mail.Message message = new javax.mail.internet.MimeMessage(session);
-//            message.setFrom(new javax.mail.internet.InternetAddress("dazace94@gmail.com")); // Cambia a tu correo
-//            message.setRecipients(javax.mail.Message.RecipientType.TO, javax.mail.internet.InternetAddress.parse(email));
-//            message.setSubject(asunto);
-//            message.setText(mensaje);
-//
-//            javax.mail.Transport.send(message);
-//            JOptionPane.showMessageDialog(this, "Correo enviado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-//        } catch (Exception e) {
-//            JOptionPane.showMessageDialog(this, "No se pudo enviar el correo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-//        }
-//    }
-    // Metodo para configurar el SMTP
-//    private Session configurarSesionSMTP() {
-//        Properties props = new Properties();
-//        props.put("mail.smtp.auth", "true"); // Requiere autenticación
-//        props.put("mail.smtp.starttls.enable", "true"); // Usa STARTTLS
-//        props.put("mail.smtp.host", "smtp.gmail.com"); // Servidor SMTP (por ejemplo, Gmail)
-//        props.put("mail.smtp.port", "587"); // Puerto para SMTP con STARTTLS
-//
-//        // Configurar la sesión con autenticación
-//        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-//            @Override
-//            protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
-//                return new javax.mail.PasswordAuthentication("tu_correo@gmail.com", "tu_contraseña"); // Cambia a tu correo y contraseña
-//            }
-//        });
-//
-//        return session;
-//    }
     // Metodo para crear una cotizacion
     private void btnCotizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCotizarActionPerformed
+        if (cliente == null || ventasCtrl == null || envioCotizacion == null) {
+            JOptionPane.showMessageDialog(this, "Faltan datos para realizar la cotización.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Verificar si el carrito de compras está vacío
+        if (ventasCotizadas == null || ventasCotizadas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El carrito de compras está vacío. No se puede generar una cotización.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         String telefono = cliente.getTelefono();
         String correo = cliente.getEmail();
+        String numeroCotizacion = ventasCtrl.obtenerYActualizarNumeroCotizacion();
 
-        int opcion = JOptionPane.showOptionDialog(this,
-                "Seleccione cómo desea enviar la cotización:",
-                "Enviar Cotización",
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                new String[]{"WhatsApp", "Correo", "Cancelar"},
-                "WhatsApp");
+        // Guardar el número de cotización en la base de datos
+        ventasCtrl.guardarNumeroCotizacionEnBaseDeDatos(numeroCotizacion);
 
-        if (opcion == 0) {
-            enviarPorWhatsApp(telefono);
-        } else if (opcion == 1) {
-            //enviarPorCorreo(correo);
-        }
+        // Crear la pantalla de carga
+        final PantallaCarga pantallaCarga = new PantallaCarga(this);  // Hacerla final
+        pantallaCarga.setMensaje("Generando cotización, por favor espere...");
+
+        // Mostrar la pantalla de carga en el hilo de la interfaz
+        SwingUtilities.invokeLater(() -> pantallaCarga.mostrar());
+
+        // Crear un hilo para generar la cotización
+        new Thread(() -> {
+            try {// Paso 1: Abrir la plantilla
+                SwingUtilities.invokeLater(() -> pantallaCarga.setProgreso(15)); // Progreso: 15%
+                // Aquí iría la lógica para abrir la plantilla (si es necesario)
+                // Seleccionar plantilla y ruta de guardado
+                String rutaPlantilla = SelecionRuta.obtenerRuta("Seleccionar Plantilla de Cotización", "Plantilla_Cotizacion.xlsx", ".xlsx");
+                if (rutaPlantilla == null) {
+                    JOptionPane.showMessageDialog(this, "No se seleccionó ninguna plantilla. Operación cancelada.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                String rutaArchivo = SelecionRuta.obtenerRuta("Guardar Cotización", "cotizacion_cliente_" + cliente.getNoCc() + ".xlsx", ".xlsx");
+                if (rutaArchivo == null) {
+                    JOptionPane.showMessageDialog(this, "No se seleccionó ninguna ubicación para guardar el archivo. Operación cancelada.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+
+                // Paso 2: Iniciar el proceso de generación (por ejemplo, insertar datos en la plantilla)
+                SwingUtilities.invokeLater(() -> pantallaCarga.setProgreso(30)); // Progreso: 30%                
+                // Llamada real para generar el archivo de cotización
+                boolean resultado = ventasCtrl.generarArchivoCotizacionConPlantilla(rutaPlantilla, rutaArchivo, numeroCotizacion, ventasCotizadas);
+                if (!resultado) {
+                    JOptionPane.showMessageDialog(this, "Error al generar la cotización.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                // Paso 3: Escribir el archivo de cotización
+                SwingUtilities.invokeLater(() -> pantallaCarga.setProgreso(90)); // Progreso: 90%              
+
+                JOptionPane.showMessageDialog(this, "Cotización generada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+                // Cuadro de diálogo para elegir el método de envío (WhatsApp o Correo)
+                String[] opcionesEnvio = {"WhatsApp", "Correo Electrónico"};
+                int opcionSeleccionada = JOptionPane.showOptionDialog(this,
+                        "Seleccione el método de envío de la cotización:",
+                        "Seleccionar Método de Envío",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                        null, opcionesEnvio, opcionesEnvio[0]);
+
+                // Verificar la opción seleccionada y proceder con el envío
+                if (opcionSeleccionada == 0) {
+                    // Enviar por WhatsApp
+                    if (telefono != null && !telefono.isEmpty()) {
+                        envioCotizacion.enviarPorWhatsApp(telefono, rutaArchivo);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "El número de teléfono del cliente no está disponible.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else if (opcionSeleccionada == 1) {
+                    // Enviar por Correo
+                    if (correo != null && !correo.isEmpty()) {
+                        envioCotizacion.enviarPorCorreo(correo, rutaArchivo);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "El correo electrónico del cliente no está disponible.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se seleccionó ningún método de envío.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                // Cerrar la pantalla de carga al finalizar el proceso
+                SwingUtilities.invokeLater(() -> pantallaCarga.cerrar());
+            }
+        }).start();
     }//GEN-LAST:event_btnCotizarActionPerformed
 
     // Metodo para Guardar la venta en la base de datos
     private void btnGuardarVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarVentaActionPerformed
         // Validar si hay productos cotizados
-        if (ventasCotizadas.isEmpty() && productosVendidos.isEmpty()) {
+        if (ventasCotizadas.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Debe agregar mínimo 1 producto al carrito antes de registrar la venta.",
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -824,18 +906,33 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                     "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        System.out.println("Productos Vendidos: " + productosVendidos);
+
+        // Verificar que hay suficiente stock para cada producto en el carrito
+        for (Venta v : ventasCotizadas) {
+            Producto producto = v.getProducto();
+            int cantidadSolicitada = v.getCantidad();
+            int cantidadDisponible = producto.getCantidad();
+
+            if (cantidadSolicitada > cantidadDisponible) {
+                JOptionPane.showMessageDialog(this, "Stock insuficiente para el producto: " + producto.getProducto()
+                        + ". Disponible: " + cantidadDisponible + ", Solicitado: " + cantidadSolicitada,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return; // Detener el proceso si hay productos con stock insuficiente
+            }
+        }
+
         // Intentar guardar la venta
         try {
             // Invocar el método del controlador para guardar la venta
             ventasCtrl.guardarVenta(venta, productosVendidos, tbVentas);
-
+            usuarioCtrl.agregarUsuario(cliente);
             // Mostrar mensaje de éxito
             JOptionPane.showMessageDialog(this, "Venta registrada con éxito.",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
             // Limpiar el carrito y las cajas de texto
             ventasCotizadas.clear();
+            productosVendidos.clear();
             modeloLista.clear();
             limpiarCajas();
             actualizarPrecioTotal();
@@ -849,14 +946,6 @@ public class FormRegistroVentas extends javax.swing.JFrame {
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnGuardarVentaActionPerformed
-
-    private void txtCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCodigoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtCodigoActionPerformed
-
-    private void txtTelefonoClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTelefonoClienteActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtTelefonoClienteActionPerformed
     // Metodo para eliminar un producto del carrito de compras
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
         int selectedIndex = listProCotizados.getSelectedIndex();
@@ -887,13 +976,68 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "La lista de productos cotizados ha sido limpiada.",
                 "Lista Limpiada", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnLimpiarCarritoActionPerformed
+
+    private void txtTelefonoClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTelefonoClienteActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtTelefonoClienteActionPerformed
+
+    // Metodo para agregar los productos al carrito de compras 
+    private void btnAgregarAlCarritoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarAlCarritoActionPerformed
+        venta = obtenerDatosFormulario();
+
+        if (venta != null) {
+            Producto producto = venta.getProducto();
+            int cantidadSolicitada = venta.getCantidad();
+            int cantidadDisponible = producto.getCantidad();
+
+            // Validar si la cantidad solicitada es mayor que la cantidad disponible en el inventario
+            if (cantidadSolicitada > cantidadDisponible) {
+                JOptionPane.showMessageDialog(this, "Stock insuficiente para el producto: " + producto.getProducto()
+                        + ". Disponible: " + cantidadDisponible + ", Solicitado: " + cantidadSolicitada,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return; // No continuar si la cantidad solicitada es mayor que la disponible
+            }
+
+            // Buscar si el producto ya está en el carrito
+            boolean productoExistente = false;
+            for (Venta v : ventasCotizadas) {
+                if (v.getProducto().getCodigo().equals(producto.getCodigo())) {
+                    // Producto ya existe en el carrito, actualizar cantidad y total
+                    v.setCantidad(v.getCantidad() + cantidadSolicitada);
+                    v.setTotal(v.getCantidad() * v.getProducto().getPrecio()); // Actualizar total
+                    productoExistente = true;
+                    break;
+                }
+            }
+
+            // Si el producto no estaba en el carrito, agregarlo
+            if (!productoExistente) {
+                ventasCotizadas.add(venta);
+                productosVendidos.add(producto); // Aquí ya tiene la cantidad ajustada
+            }
+
+            // Actualizar la información de la cotización en el JList
+            mostrarInformacionCotizacion(ventasCotizadas);
+
+            JOptionPane.showMessageDialog(this, "Producto agregado al carrito con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            limpiarCajas();
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, completa todos los campos requeridos.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+//GEN-LAST:event_btnAgregarAlCarritoActionPerformed
+
+    private void txtClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtClienteActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtClienteActionPerformed
+
+    private void txtCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCodigoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCodigoActionPerformed
     // Metodo para actualizar el precio total de la venta
     private void actualizarPrecioTotal() {
-        double totalGeneral = 0;
-        for (Venta venta : ventasCotizadas) {
-            totalGeneral += venta.getTotal();
-        }
-        textValorTotal.setText("Precio Total: " + totalGeneral);
+        double total = ventasCotizadas.stream().mapToDouble(Venta::getTotal).sum();
+        textValorTotal.setText("Precio Total: " + String.format("%.2f", total));
     }
 
     public static void main(String args[]) {
@@ -912,14 +1056,19 @@ public class FormRegistroVentas extends javax.swing.JFrame {
     private javax.swing.JButton btnGuardarVenta;
     private javax.swing.JButton btnLimpiarCarrito;
     private javax.swing.JButton btnMenuPrincipal;
+    private javax.swing.JCheckBox checkCredito;
+    private javax.swing.JCheckBox checkEfectivo;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -934,6 +1083,9 @@ public class FormRegistroVentas extends javax.swing.JFrame {
     private javax.swing.JTable tbVentas;
     private javax.swing.JLabel textCedula;
     private javax.swing.JLabel textCorreo;
+    private javax.swing.JLabel textDIR;
+    private javax.swing.JLabel textMetodoPago;
+    private javax.swing.JLabel textNIT;
     private javax.swing.JLabel textNombre;
     private javax.swing.JLabel textTelefono;
     private javax.swing.JLabel textValorTotal;
@@ -944,7 +1096,9 @@ public class FormRegistroVentas extends javax.swing.JFrame {
     private javax.swing.JLabel txtCorreoCl;
     private javax.swing.JTextField txtCorreoCliente;
     private javax.swing.JTextField txtDescuento;
+    private javax.swing.JTextField txtDir;
     private javax.swing.JLabel txtNameCliente;
+    private javax.swing.JTextField txtNit;
     private javax.swing.JTextField txtNoCc;
     private javax.swing.JLabel txtNoCcCliente;
     private javax.swing.JLabel txtNoTel;

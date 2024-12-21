@@ -1,15 +1,18 @@
 package com.mycompany.zl_solucion_integral.vistas;
 
 import com.mycompany.zl_solucion_integral.config.Listener;
+import com.mycompany.zl_solucion_integral.config.PantallaCarga;
+import com.mycompany.zl_solucion_integral.config.SelecionRuta;
 import com.mycompany.zl_solucion_integral.config.UtilVentanas;
 import com.mycompany.zl_solucion_integral.controllers.ProductoController;
 import com.mycompany.zl_solucion_integral.models.Producto;
 import com.mycompany.zl_solucion_integral.util.ExcelSQLiteManager;
+import javax.swing.JFrame;
 
-import javax.swing.JFileChooser;
-import java.io.File;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /**
  * Ventana para registrar y gestionar productos. Controla el registro,
@@ -56,8 +59,7 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         ListCategoria.addItem("EPP"); // Agrega tus categorías
         ListCategoria.addItem("BOTIQUIN");
         ListCategoria.addItem("EQUIPO DE CONTINGENCIA");
-        ListCategoria.addItem("PUNTO ECOLOGICO");
-        // Agrega más categorías según las que tienes en la base de datos   
+        ListCategoria.addItem("PUNTO ECOLOGICO");        
     }
 
     // Método para obtener los datos del formulario 
@@ -492,75 +494,99 @@ public class FormRegistroProductos extends javax.swing.JFrame {
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnImportarExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportarExcelActionPerformed
-        // Seleccionar el archivo Excel
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Seleccionar archivo Excel");
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // Seleccionar la ruta del archivo Excel usando el método SeleccionRuta
+        String rutaExcel = SelecionRuta.obtenerRutaAbrir("Seleccionar archivo Excel");
 
-        int seleccion = fileChooser.showOpenDialog(this);
-        if (seleccion == JFileChooser.APPROVE_OPTION) {
-            File archivoSeleccionado = fileChooser.getSelectedFile();
-            String rutaExcel = archivoSeleccionado.getAbsolutePath();
-
+        // Verificar si el usuario seleccionó un archivo
+        if (rutaExcel != null) {
             // Configurar nombre de la base de datos y tabla
             String nombreBD = "db.db";
             String nombreTabla = "productos";
 
-            // Llamar al método de importación
-            ExcelSQLiteManager.importarExcel(rutaExcel, nombreBD, nombreTabla);
-            JOptionPane.showMessageDialog(this, "Importación completada.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            productoCtrl.mostrarProductos(tbProductos);
+            // Crear y mostrar la pantalla de carga
+            PantallaCarga pantalla = new PantallaCarga(FormRegistroProductos.this);
+            pantalla.setMensaje("Importando datos desde Excel...");
+
+            // Crear tarea en segundo plano
+            SwingWorker<Void, Integer> tarea = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try {
+                        int totalRegistros = ExcelSQLiteManager.obtenerNumeroDeFilas(rutaExcel);
+                        for (int i = 0; i < totalRegistros; i++) {
+                            ExcelSQLiteManager.importarFila(rutaExcel, nombreBD, nombreTabla, i);
+                            publish((i + 1) * 100 / totalRegistros); // Actualizar progreso
+                        }
+                    } catch (Exception e) {
+                        throw new Exception("Error durante la importación: " + e.getMessage());
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void process(java.util.List<Integer> chunks) {
+                    // Actualizar la barra de progreso
+                    pantalla.setProgreso(chunks.get(chunks.size() - 1));
+                }
+
+                @Override
+                protected void done() {
+                    pantalla.cerrar();
+                    try {
+                        get(); // Verifica si ocurrió alguna excepción
+                        productoCtrl.mostrarProductos(tbProductos);
+                        JOptionPane.showMessageDialog(FormRegistroProductos.this, "Importación completada.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(FormRegistroProductos.this,
+                                e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            };
+
+            // Mostrar la pantalla de carga y ejecutar la tarea
+            pantalla.mostrar();
+            tarea.execute();
         } else {
             JOptionPane.showMessageDialog(this, "Importación cancelada.", "Cancelado", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnImportarExcelActionPerformed
 
     private void btnExportarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportarActionPerformed
-        // Nombre de la tabla en SQLite que deseas exportar
-        String nombreTabla = "productos";
+        // Usar la clase SeleccionRuta para obtener la ruta de exportación
+        String rutaExcel = SelecionRuta.obtenerRuta("Exportar archivo Excel", "Inventario_productos_exportado.xlsx", ".xlsx");
 
-        // Configurar el JFileChooser para seleccionar la ubicación y nombre del archivo a exportar
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Guardar archivo Excel");
+        if (rutaExcel != null) {
+            // Crear una pantalla de carga
+            PantallaCarga pantallaCarga = new PantallaCarga((JFrame) SwingUtilities.getWindowAncestor(this));
 
-        // Configurar para que solo permita elegir archivos (sin abrir carpetas)
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            // Crear un SwingWorker para ejecutar la exportación en segundo plano
+            SwingWorker<Void, Void> exportacionWorker = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    pantallaCarga.mostrar(); // Mostrar la pantalla de carga
+                    pantallaCarga.setMensaje("Exportando datos...");
 
-        // Definir el archivo con extensión .xlsx por defecto
-        fileChooser.setSelectedFile(new File("archivo_exportado.xlsx"));
+                    // Aquí llamamos al método de exportación
+                    ExcelSQLiteManager.exportarDatosAExcel("productos", rutaExcel);
 
-        int seleccion = fileChooser.showSaveDialog(this);
+                    return null;
+                }
 
-        if (seleccion == JFileChooser.APPROVE_OPTION) {
-            // Obtener la ruta seleccionada por el usuario
-            File archivoSeleccionado = fileChooser.getSelectedFile();
-            String rutaExcel = archivoSeleccionado.getAbsolutePath();
+                @Override
+                protected void done() {
+                    pantallaCarga.cerrar(); // Cerrar la pantalla de carga
+                    JOptionPane.showMessageDialog(null, "Exportación completada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                }
+            };
 
-            // Verificar y agregar la extensión .xlsx si no está incluida
-            if (!rutaExcel.toLowerCase().endsWith(".xlsx")) {
-                rutaExcel += ".xlsx";
-            }
-
-            // Llamar al método de exportación
-            ExcelSQLiteManager.exportarDatosAExcel(nombreTabla, rutaExcel);
-
-            // Mostrar mensaje de confirmación
-            JOptionPane.showMessageDialog(this, "Datos exportados exitosamente a " + rutaExcel, "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Exportación cancelada.", "Cancelado", JOptionPane.WARNING_MESSAGE);
+            exportacionWorker.execute(); // Iniciar la tarea en segundo plano
         }
     }//GEN-LAST:event_btnExportarActionPerformed
 
     private void ListCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ListCategoriaActionPerformed
         String categoriaSelecionada = (String) ListCategoria.getSelectedItem();
-        filtrarPorCategoria(categoriaSelecionada);
+        productoCtrl.mostrarProductosPorCategoria(tbProductos, categoriaSelecionada);
     }//GEN-LAST:event_ListCategoriaActionPerformed
-
-    // Metodo para filtrar y acctualizar la tabla productos
-    private void filtrarPorCategoria(String categoria) {
-        productoCtrl.mostrarProductosPorCategoria(tbProductos, categoria);
-    }
-
     // Metodo para Limpiar el formulario  
     private void limpiarFormulario() {
         txtProducto.setText("");

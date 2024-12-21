@@ -15,6 +15,7 @@ public class Venta {
     private Usuario cliente;
     private String vendedor; // Vendedor responsable de la venta
     private int cantidadDisponible; // Cantidad restante en inventario después de la venta
+    private String metodoPago;
 
     // Constructor vacío
     public Venta() {
@@ -28,15 +29,17 @@ public class Venta {
     }
 
     // Constructor completo
-    public Venta(String codigo, Producto producto, int cantidad, LocalDate fecha, String vendedor, double total, double descuento, int cantidadDisponible) {
+    public Venta(String codigo, Producto producto, int cantidad, LocalDate fecha, String vendedor, Usuario cliente, double total, double descuento, int cantidadDisponible, String metodoPago) {
         this.codigo = codigo;
         this.producto = producto;
         this.cantidad = cantidad;
         this.fecha = fecha;
         this.vendedor = vendedor;
+        this.cliente = cliente;
         this.total = total;
         this.descuento = descuento;
         this.cantidadDisponible = cantidadDisponible;
+        this.metodoPago = metodoPago;
     }
 
     // Getters y Setters
@@ -120,23 +123,13 @@ public class Venta {
         this.cantidadDisponible = cantidadDisponible;
     }
 
-    // Métodos adicionales para claridad
-    public double getPrecio() {
-        return producto != null ? producto.getPrecio() : 0.0; // Precio del producto
+    public String getMetodoPago() {
+        return metodoPago;
     }
 
-    public double calcularSubtotal() {
-        return getPrecio() * cantidad; // Subtotal sin descuento
-    }
-
-    public double calcularDescuento() {
-        return calcularSubtotal() * (descuento / 100); // Monto de descuento
-    }
-
-    public double calcularTotal() {
-        return calcularSubtotal() - calcularDescuento(); // Total final
-    }
-
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
+    }      
     // Representación en texto
     @Override
     public String toString() {

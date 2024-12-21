@@ -28,11 +28,11 @@
             <version>3.46.1.0</version>
         </dependency>
 
-        <!-- Jakarta Mail para envío de correos -->
+        <!-- Dependencia de JavaMail -->
         <dependency>
             <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            <version>2.0.1</version>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
         </dependency>
 
         <!-- Lombok para facilitar el código -->
@@ -82,5 +82,11 @@
                 </executions>
             </plugin>
         </plugins>
+        <!-- Agregar los recursos -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory> <!-- Carpeta de recursos -->
+            </resource>
+        </resources>
     </build>
 </project>

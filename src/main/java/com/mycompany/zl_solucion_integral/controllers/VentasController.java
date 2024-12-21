@@ -15,7 +15,6 @@ import com.mycompany.zl_solucion_integral.models.Producto;
 import com.mycompany.zl_solucion_integral.models.Sesion;
 import com.mycompany.zl_solucion_integral.models.Usuario;
 import com.mycompany.zl_solucion_integral.models.Venta;
-import com.mycompany.zl_solucion_integral.vistas.FormRegistroVentas;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,12 +22,21 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+
 import java.util.logging.Level;
 import javax.swing.JTable;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import org.apache.poi.ss.usermodel.*;
+
+import java.util.List;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 /* Clase encargada de manejar las operaciones 
 relacionadas con las ventas en la base de datos*/
@@ -95,14 +103,14 @@ public class VentasController {
                 // Insertar en detalles_venta
                 psDetalle.setInt(1, ventaId);
                 psDetalle.setString(2, producto.getProducto());
-                psDetalle.setInt(3, producto.getCantidad());
+                psDetalle.setInt(3, producto.getCantidadSolicitada());
                 psDetalle.setString(4, producto.getCodigo());
                 psDetalle.setDouble(5, producto.getPrecio());
-                psDetalle.setDouble(6, producto.getPrecio() * producto.getCantidad());
+                psDetalle.setDouble(6, producto.getPrecio() * producto.getCantidadSolicitada());
                 psDetalle.executeUpdate();
 
                 // Actualizar stock del producto
-                psStock.setInt(1, producto.getCantidad());
+                psStock.setInt(1, producto.getCantidadSolicitada());
                 psStock.setString(2, producto.getCodigo());
                 psStock.setInt(3, producto.getCantidad());
                 if (psStock.executeUpdate() == 0) {
@@ -112,7 +120,7 @@ public class VentasController {
 
             // Confirmar transacción
             conn.commit();
-            JOptionPane.showMessageDialog(null, "Venta guardada y stock actualizado exitosamente.");
+            JOptionPane.showMessageDialog(null, "Venta guardada  y stock actualizado exitosamente.");
             MostrarVentas(tablaVentas);
 
         } catch (SQLException e) {
@@ -270,6 +278,57 @@ public class VentasController {
         }
     }
 
+    public void guardarNumeroCotizacionEnBaseDeDatos(String numeroCotizacion) {
+        String sqlActualizar = "UPDATE configuracion SET ultimoNumeroCotizacion = ? WHERE id = 1";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sqlActualizar)) {
+            pstmt.setString(1, numeroCotizacion);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error al guardar el número de cotización en la base de datos", e);
+        }
+    }
+
+    public String obtenerYActualizarNumeroCotizacion() {
+        SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyyMMdd");
+        String fecha = formatoFecha.format(new Date());
+        int siguienteNumero = 1; // Valor predeterminado si no hay registros previos
+
+        // Consultas SQL
+        String sqlConsulta = "SELECT ultimoNumeroCotizacion FROM configuracion WHERE id = 1";
+        String sqlActualizar = "UPDATE configuracion SET ultimoNumeroCotizacion = ? WHERE id = 1";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement psConsulta = conn.prepareStatement(sqlConsulta); PreparedStatement psActualizar = conn.prepareStatement(sqlActualizar)) {
+
+            // Consultar el último número de cotización
+            ResultSet rs = psConsulta.executeQuery();
+            if (rs.next()) {
+                String ultimoNumero = rs.getString("ultimoNumeroCotizacion");
+                if (ultimoNumero != null && ultimoNumero.startsWith(fecha)) {
+                    // Extraer el número actual después del guión y sumarle 1
+                    siguienteNumero = Integer.parseInt(ultimoNumero.split("-")[1]) + 1;
+                } else {
+                    // Si la fecha cambió, reinicia el conteo para la nueva fecha
+                    siguienteNumero = 1;
+                }
+            }
+
+            // Generar el nuevo número de cotización
+            String nuevoNumero = fecha + "-" + String.format("%03d", siguienteNumero);
+
+            // Actualizar en la base de datos
+            psActualizar.setString(1, nuevoNumero);
+            psActualizar.executeUpdate();
+
+            // Devolver el nuevo número generado
+            return nuevoNumero;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error al obtener y actualizar el número de cotización", e);
+            return null; // Manejo en caso de error
+        }
+    }
+
     /**
      * Método para mostrar todos las ventas en una tabla.
      *
@@ -342,4 +401,68 @@ public class VentasController {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");  // Formato de fecha deseado
         return sdf.format(fecha);  // Retorna la fecha en formato legible
     }
+
+    public boolean generarArchivoCotizacionConPlantilla(String rutaPlantilla, String rutaArchivo, String numeroCotizacion, List<Venta> ventasCotizadas) {
+        // Verificar si la plantilla es un archivo Excel válido
+        File archivoPlantilla = new File(rutaPlantilla);
+        if (!archivoPlantilla.exists() || !archivoPlantilla.getName().endsWith(".xlsx")) {
+            JOptionPane.showMessageDialog(null, "La plantilla seleccionada no es un archivo Excel válido.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return false;  // Retorna false si el archivo no es válido
+        }
+
+        try (InputStream inputStream = new FileInputStream(archivoPlantilla); Workbook workbook = new XSSFWorkbook(inputStream)) {
+
+            // Procesar la hoja de Excel
+            Sheet sheet = workbook.getSheetAt(0); // Primera hoja
+
+            // Llenar la fecha (columna A a C)
+            String fecha = java.time.LocalDate.now().toString(); // Fecha actual
+            sheet.getRow(6).getCell(0).setCellValue("FECHA: " + fecha);
+
+            // Llenar el número de cotización (columnas D y E)            
+            sheet.getRow(6).getCell(3).setCellValue("COTIZACION N°: " + numeroCotizacion);
+
+            // Llenar el método de pago (columna F) usando la primera venta
+            if (!ventasCotizadas.isEmpty()) {
+                sheet.getRow(7).getCell(5).setCellValue(ventasCotizadas.get(0).getMetodoPago());  // Usar el método de pago de la primera venta
+            }
+            // Llenar los datos del cliente (filas 8 y 9)
+            sheet.getRow(7).getCell(0).setCellValue("CLIENTE: " + cliente.getNombre());
+            sheet.getRow(8).getCell(0).setCellValue("NIT: " + cliente.getNIT());
+            sheet.getRow(8).getCell(2).setCellValue("DIR: " + cliente.getDIR());
+            sheet.getRow(8).getCell(5).setCellValue("TELEFONO: " + cliente.getTelefono());
+
+            // Llenar los productos cotizados a partir de la fila 11
+            int rowNum = 11;
+            for (Venta venta : ventasCotizadas) {
+                Row row = sheet.createRow(rowNum++);
+
+                // Llenar la cantidad en la columna A
+                row.createCell(0).setCellValue(venta.getCantidad());
+
+                // Llenar el nombre del producto en las columnas B a D
+                row.createCell(1).setCellValue(venta.getProducto().getProducto());
+
+                // Llenar el valor unitario en la columna E
+                row.createCell(4).setCellValue(venta.getProducto().getPrecio());
+
+                // Llenar el valor total en la columna F
+                row.createCell(5).setCellValue(venta.getTotal());
+            }
+
+            // Guardar el archivo generado
+            try (FileOutputStream fileOut = new FileOutputStream(rutaArchivo)) {
+                workbook.write(fileOut);
+                JOptionPane.showMessageDialog(null, "Archivo Excel generado con éxito: " + rutaArchivo,
+                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                return true;  // Retorna true si la generación del archivo fue exitosa
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error al generar el archivo Excel: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return false;  // Retorna false si ocurre un error durante la operación
+        }
+    }
+
 }
