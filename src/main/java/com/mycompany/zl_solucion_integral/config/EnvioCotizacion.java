@@ -51,26 +51,30 @@ public class EnvioCotizacion {
             Properties propiedades = new Properties();
             propiedades.put("mail.smtp.host", "smtp.gmail.com");  // Servidor SMTP de Gmail.
             propiedades.put("mail.smtp.port", "587");  // Puerto para conexión segura (TLS).
-            propiedades.put("mail.smtp.auth", "false");  // Habilita la autenticación.
+            propiedades.put("mail.smtp.auth", "true");  // Habilita la autenticación.
             propiedades.put("mail.smtp.starttls.enable", "true");  // Habilita STARTTLS (cifrado).
 
             // Autenticación con las credenciales del remitente.
             Session session = Session.getInstance(propiedades, new javax.mail.Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("dazace94@gmail.com", "1004473324brandon"); // Cambia por tus credenciales reales.
+                    return new PasswordAuthentication("seguridadlaboralhseq@gmail.com", ""); // Cambia por tus credenciales reales.
                 }
             });
 
             // Crear el mensaje de correo.
             MimeMessage mensajeCorreo = new MimeMessage(session);
-            mensajeCorreo.setFrom(new InternetAddress("dazace94@gmail.com")); // Dirección del remitente.
+            mensajeCorreo.setFrom(new InternetAddress("seguridadlaboralhseq@gmail.com")); // Dirección del remitente.
             mensajeCorreo.setRecipients(Message.RecipientType.TO, InternetAddress.parse(correo)); // Destinatario.
             mensajeCorreo.setSubject("Cotización Generada"); // Asunto del correo.
 
             // Cuerpo del mensaje en texto.
             MimeBodyPart texto = new MimeBodyPart();
-            texto.setText("¡Hola! Aquí está la cotización que solicitaste. Por favor revisa el archivo adjunto.");
+            texto.setText("¡Hola! Espero que este mensaje te encuentre bien. "
+                    + "Aquí está la cotización que solicitaste. "
+                    + "El archivo adjunto contiene todos los detalles de los productos y servicios. "
+                    + "Por favor, no dudes en comunicarte si tienes alguna pregunta o necesitas realizar algún ajuste en la cotización. "
+                    + "¡Gracias por confiar en nosotros!");
 
             // Archivo adjunto.
             MimeBodyPart adjunto = new MimeBodyPart();

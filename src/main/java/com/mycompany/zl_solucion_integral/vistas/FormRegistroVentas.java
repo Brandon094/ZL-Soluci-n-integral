@@ -1037,7 +1037,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
     // Metodo para actualizar el precio total de la venta
     private void actualizarPrecioTotal() {
         double total = ventasCotizadas.stream().mapToDouble(Venta::getTotal).sum();
-        textValorTotal.setText("Precio Total: " + String.format("%.2f", total));
+        textValorTotal.setText("Precio Total: " + String.format("%.2f", total));        
     }
 
     public static void main(String args[]) {

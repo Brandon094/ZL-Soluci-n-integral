@@ -69,7 +69,7 @@ public class Main {
     private static void iniciarAplicacion() {
         FormLogIn loginForm = new FormLogIn();
         loginForm.setVisible(true);
-       //FormRegistroUsuarios ru = new FormRegistroUsuarios();
-       //ru.setVisible(true);
+       /*FormRegistroUsuarios ru = new FormRegistroUsuarios();
+       ru.setVisible(true);*/
     }
 }

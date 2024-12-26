@@ -388,6 +388,21 @@ public class VentasController {
             }
 
             tablaVentas.setModel(modelo);
+
+            // Ajustar el tamaño de las columnas
+            tablaVentas.getColumnModel().getColumn(0).setPreferredWidth(50);  // Id
+            tablaVentas.getColumnModel().getColumn(1).setPreferredWidth(250); // Producto
+            tablaVentas.getColumnModel().getColumn(2).setPreferredWidth(50);  // Cantidad
+            tablaVentas.getColumnModel().getColumn(3).setPreferredWidth(100); // Código
+            tablaVentas.getColumnModel().getColumn(4).setPreferredWidth(75);  // Precio
+            tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
+            tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
+            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
+            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
+            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
+
+            // Opcional: ajustar automáticamente las alturas de las filas si el contenido lo requiere
+            //tablaVentas.setRowHeight(25);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error al mostrar ventas", e);
             JOptionPane.showMessageDialog(null, "Error al mostrar ventas: " + e.getMessage());
@@ -427,6 +442,7 @@ public class VentasController {
             if (!ventasCotizadas.isEmpty()) {
                 sheet.getRow(7).getCell(5).setCellValue(ventasCotizadas.get(0).getMetodoPago());  // Usar el método de pago de la primera venta
             }
+
             // Llenar los datos del cliente (filas 8 y 9)
             sheet.getRow(7).getCell(0).setCellValue("CLIENTE: " + cliente.getNombre());
             sheet.getRow(8).getCell(0).setCellValue("NIT: " + cliente.getNIT());
@@ -447,8 +463,9 @@ public class VentasController {
                 // Llenar el valor unitario en la columna E
                 row.createCell(4).setCellValue(venta.getProducto().getPrecio());
 
-                // Llenar el valor total en la columna F
-                row.createCell(5).setCellValue(venta.getTotal());
+                // Calcular el valor total para esta venta
+                double totalProducto = venta.getCantidad() * venta.getProducto().getPrecio();
+                row.createCell(5).setCellValue(totalProducto);
             }
 
             // Guardar el archivo generado
