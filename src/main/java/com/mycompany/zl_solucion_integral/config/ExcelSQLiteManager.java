@@ -22,8 +22,9 @@ public class ExcelSQLiteManager {
     // Se declara 'conexion' como estático para acceder desde un método estático
     private static ConexionDB conexion = new ConexionDB();
 
-    public static void importarExcel(String rutaExcel, String nombreBD, String nombreTabla) {
+    public static void importarExcel(String rutaExcel, String nombreTabla) {
         Connection conn = null;
+
         try {
             conn = conexion.establecerConexion();
             if (conn != null) {
@@ -33,97 +34,79 @@ public class ExcelSQLiteManager {
                     // Recorrer todas las hojas del archivo Excel
                     for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
                         Sheet sheet = workbook.getSheetAt(sheetIndex);
-                        System.out.println("Importando hoja: " + sheet.getSheetName());
+                        System.out.println("Procesando hoja: " + sheet.getSheetName());
 
-                        // Crear tabla en SQLite si no existe (esto podría cambiar dependiendo de si quieres hacer esto por cada hoja)
-                        String createTableSQL = generarSQLCreacionTabla(sheet, nombreTabla);
-                        try (PreparedStatement stmt = conn.prepareStatement(createTableSQL)) {
-                            stmt.executeUpdate();
+                        // Crear la tabla si no existe
+                        if (sheetIndex == 0) { // Solo se genera la tabla una vez
+                            String createTableSQL = generarSQLCreacionTabla(sheet, nombreTabla);
+                            try (PreparedStatement stmt = conn.prepareStatement(createTableSQL)) {
+                                stmt.executeUpdate();
+                                System.out.println("Tabla verificada/creada correctamente: " + nombreTabla);
+                            }
                         }
 
-                        // Procesar las filas de la hoja
+                        // Importar los datos de la hoja
                         for (int i = 1; i <= sheet.getLastRowNum(); i++) { // Empezar en la segunda fila (i = 1)
                             Row row = sheet.getRow(i);
 
                             if (row == null) {
                                 continue; // Si la fila está vacía, saltar a la siguiente
                             }
-                            // Leer los datos de cada columna solo si la celda existe y no está vacía
-                            String codigoProducto = (row.getCell(3) != null && !row.getCell(3).toString().isEmpty()) ? row.getCell(3).toString().trim() : "";
-                            String nombreProducto = (row.getCell(0) != null && !row.getCell(0).toString().isEmpty()) ? row.getCell(0).toString().trim() : "";
-                            String categoria = (row.getCell(4) != null && !row.getCell(4).toString().isEmpty()) ? row.getCell(4).toString().trim() : "Sin Categoría";
-                            double precio = (row.getCell(1) != null && !row.getCell(1).toString().isEmpty()) ? obtenerNumeroDeCelda(row.getCell(1)) : 0.0;
-                            double cantidad = (row.getCell(2) != null && !row.getCell(2).toString().isEmpty()) ? obtenerNumeroDeCelda(row.getCell(2)) : 0.0;
 
-                            // Verificar si el producto tiene al menos un dato válido
-                            if (!codigoProducto.isEmpty() && !nombreProducto.isEmpty()) {
-                                // Verificar si el producto ya existe
-                                String selectSQL = "SELECT cantidad FROM " + nombreTabla + " WHERE codigo = ?";
-                                try (PreparedStatement selectStmt = conn.prepareStatement(selectSQL)) {
-                                    selectStmt.setString(1, codigoProducto);
-                                    ResultSet rs = selectStmt.executeQuery();
+                            // Leer los datos de las columnas
+                            String nombreProducto = obtenerValorCelda(row.getCell(0)); // Asumimos que la segunda columna es el nombre del producto
+                            double precio = obtenerValorNumerico(row.getCell(1)); // Asumimos que la tercera columna es el precio
+                            double cantidad = obtenerValorNumerico(row.getCell(2)); // Asumimos que la cuarta columna es la cantidad
+                            String codigoProducto = obtenerValorCelda(row.getCell(3)); // Asumimos que la primera columna es el código
+                            String categoria = obtenerValorCelda(row.getCell(4)); // Asumimos que la quinta columna es la categoría
 
-                                    if (rs.next()) {
-                                        double cantidadExistente = rs.getDouble("cantidad");
-                                        String updateSQL = "UPDATE " + nombreTabla + " SET cantidad = ?, categoria = ?, precio = ? WHERE codigo = ?";
-                                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSQL)) {
-                                            updateStmt.setDouble(1, cantidadExistente + cantidad); // actualizar cantidad
-                                            updateStmt.setString(2, categoria); // actualizar categoría
-                                            updateStmt.setDouble(3, precio); // actualizar precio
-                                            updateStmt.setString(4, codigoProducto); // código producto
-                                            updateStmt.executeUpdate();
-                                        }
-                                    } else {
-                                        String insertSQL = "INSERT INTO " + nombreTabla + " (producto, precio, cantidad, codigo, categoria) VALUES (?, ?, ?, ?, ?)";
-                                        try (PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
-                                            insertStmt.setString(1, nombreProducto);
-                                            insertStmt.setDouble(2, precio);
-                                            insertStmt.setDouble(3, cantidad);
-                                            insertStmt.setString(4, codigoProducto);
-                                            insertStmt.setString(5, categoria);
-                                            insertStmt.executeUpdate();
-                                        }
+                            // Verificar si el producto ya existe
+                            String selectSQL = "SELECT cantidad FROM " + nombreTabla + " WHERE codigo = ?";
+                            try (PreparedStatement selectStmt = conn.prepareStatement(selectSQL)) {
+                                selectStmt.setString(1, codigoProducto);
+                                ResultSet rs = selectStmt.executeQuery();
+
+                                if (rs.next()) {
+                                    // Actualizar el producto si ya existe
+                                    double cantidadExistente = rs.getDouble("cantidad");
+                                    String updateSQL = "UPDATE " + nombreTabla + " SET cantidad = ?, categoria = ?, precio = ? WHERE codigo = ?";
+                                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSQL)) {
+                                        updateStmt.setDouble(1, cantidadExistente + cantidad);
+                                        updateStmt.setString(2, categoria);
+                                        updateStmt.setDouble(3, precio);
+                                        updateStmt.setString(4, codigoProducto);
+                                        updateStmt.executeUpdate();
+                                    }
+                                } else {
+                                    // Insertar el producto si no existe
+                                    String insertSQL = "INSERT INTO " + nombreTabla + " (producto, precio, cantidad, codigo, categoria) VALUES (?, ?, ?, ?, ?)";
+                                    try (PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
+                                        insertStmt.setString(1, nombreProducto);
+                                        insertStmt.setDouble(2, precio);
+                                        insertStmt.setDouble(3, cantidad);
+                                        insertStmt.setString(4, codigoProducto);
+                                        insertStmt.setString(5, categoria);
+                                        insertStmt.executeUpdate();
                                     }
                                 }
                             }
                         }
                     }
-
-                    System.out.println("Datos importados correctamente a la base de datos.");
+                    System.out.println("Datos importados correctamente.");
                 }
             } else {
                 System.out.println("Error al establecer la conexión a la base de datos.");
             }
         } catch (SQLException | IOException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.err.println("Error general: " + e.getMessage());
         } finally {
             if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
-                    System.out.println("Error al cerrar la conexión: " + e.getMessage());
+                    System.err.println("Error al cerrar la conexión: " + e.getMessage());
                 }
             }
-        }
-    }
-
-// Método auxiliar para obtener un número de una celda, validando que sea numérico
-    private static double obtenerNumeroDeCelda(Cell cell) {
-        if (cell == null) {
-            return 0.0;
-        }
-
-        // Si la celda es un número, retornamos el valor como double
-        if (cell.getCellType() == CellType.NUMERIC) {
-            return cell.getNumericCellValue();
-        }
-
-        // Si la celda es texto, intentamos convertirla a un número
-        try {
-            String cellValue = cell.toString().trim();
-            return Double.parseDouble(cellValue);
-        } catch (NumberFormatException e) {
-            return 0.0; // En caso de error, retornamos 0.0
         }
     }
 
@@ -225,107 +208,18 @@ public class ExcelSQLiteManager {
         return sb.toString();
     }
 
-    /**
-     * Obtiene el número de filas en una hoja específica de un archivo Excel.
-     *
-     * @param rutaExcel La ruta del archivo Excel.
-     * @return El número total de filas en la hoja principal (primera hoja).
-     * @throws IOException Si ocurre un error al leer el archivo Excel.
-     */
-    public static int obtenerNumeroDeFilas(String rutaExcel) throws IOException {
-        try (FileInputStream fis = new FileInputStream(rutaExcel); Workbook workbook = new XSSFWorkbook(fis)) {
-            Sheet sheet = workbook.getSheetAt(0); // Primera hoja
-            return sheet.getLastRowNum() + 1; // Retorna el número de filas
+    private static String obtenerValorCelda(Cell celda) {
+        if (celda == null) {
+            return "";
         }
+        return celda.getCellType() == CellType.STRING ? celda.getStringCellValue().trim() : "";
     }
 
-    /**
-     * Importa una fila específica de un archivo Excel a una tabla de SQLite.
-     *
-     * @param rutaExcel La ruta del archivo Excel.
-     * @param nombreBD El nombre de la base de datos SQLite.
-     * @param nombreTabla El nombre de la tabla en la base de datos.
-     * @param filaIndex El índice de la fila a importar (0-based).
-     * @throws IOException Si ocurre un error al leer el archivo Excel.
-     * @throws SQLException Si ocurre un error al interactuar con la base de
-     * datos.
-     */
-    public static void importarFila(String rutaExcel, String nombreBD, String nombreTabla, int filaIndex) throws IOException, SQLException {
-        try (FileInputStream fis = new FileInputStream(rutaExcel); Workbook workbook = new XSSFWorkbook(fis)) {
-            Sheet sheet = workbook.getSheetAt(0); // Primera hoja
-            Row row = sheet.getRow(filaIndex);
-
-            // Ignorar encabezados
-            if (filaIndex == 0 || row == null) {
-                return; // Si es la fila de encabezados o está vacía, no hacer nada
-            }
-
-            // Leer datos de las celdas de la fila
-            String codigoProducto = (row.getCell(3) != null) ? row.getCell(3).toString().trim() : "";
-            String nombreProducto = (row.getCell(0) != null) ? row.getCell(0).toString().trim() : "";
-
-            // Validar y leer cantidad
-            double cantidad = 0.0;
-            if (row.getCell(2) != null) {
-                Cell cellCantidad = row.getCell(2);
-                if (cellCantidad.getCellType() == CellType.NUMERIC) {
-                    cantidad = cellCantidad.getNumericCellValue();
-                } else {
-                    // Manejo de error para celdas no numéricas
-                    throw new IllegalArgumentException("La celda en la columna 'CANTIDAD' no es numérica: " + cellCantidad.toString());
-                }
-            }
-
-            // Leer categoría
-            String categoria = (row.getCell(4) != null) ? row.getCell(4).toString().trim() : "Sin Categoría";
-
-            // Validar y leer precio
-            double precio = 0.0;
-            if (row.getCell(1) != null) {
-                Cell cellPrecio = row.getCell(1);
-                if (cellPrecio.getCellType() == CellType.NUMERIC) {
-                    precio = cellPrecio.getNumericCellValue();
-                } else {
-                    throw new IllegalArgumentException("La celda en la columna 'PRECIO' no es numérica: " + cellPrecio.toString());
-                }
-            }
-
-            // Verificar conexión a la base de datos
-            try (Connection conn = conexion.establecerConexion()) {
-                if (conn == null) {
-                    throw new SQLException("No se pudo establecer conexión con la base de datos.");
-                }
-
-                // Verificar si el producto ya existe
-                String selectSQL = "SELECT cantidad FROM " + nombreTabla + " WHERE codigo = ?";
-                try (PreparedStatement selectStmt = conn.prepareStatement(selectSQL)) {
-                    selectStmt.setString(1, codigoProducto);
-                    ResultSet rs = selectStmt.executeQuery();
-
-                    if (rs.next()) {
-                        double cantidadExistente = rs.getDouble("cantidad");
-                        String updateSQL = "UPDATE " + nombreTabla + " SET cantidad = ?, categoria = ?, precio = ? WHERE codigo = ?";
-                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSQL)) {
-                            updateStmt.setDouble(1, cantidadExistente + cantidad);
-                            updateStmt.setString(2, categoria);
-                            updateStmt.setDouble(3, precio);
-                            updateStmt.setString(4, codigoProducto);
-                            updateStmt.executeUpdate();
-                        }
-                    } else {
-                        String insertSQL = "INSERT INTO " + nombreTabla + " (producto, precio, cantidad, codigo, categoria) VALUES (?, ?, ?, ?, ?)";
-                        try (PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
-                            insertStmt.setString(1, nombreProducto);
-                            insertStmt.setDouble(2, precio);
-                            insertStmt.setDouble(3, cantidad);
-                            insertStmt.setString(4, codigoProducto);
-                            insertStmt.setString(5, categoria);
-                            insertStmt.executeUpdate();
-                        }
-                    }
-                }
-            }
+    private static double obtenerValorNumerico(Cell celda) {
+        if (celda == null) {
+            return 0.0;
         }
+        return celda.getCellType() == CellType.NUMERIC ? celda.getNumericCellValue() : 0.0;
     }
 
 }

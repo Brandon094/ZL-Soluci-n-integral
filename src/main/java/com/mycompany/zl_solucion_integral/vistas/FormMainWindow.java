@@ -66,6 +66,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnSalir.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         btnSalir.setText("Salir de la app");
+        btnSalir.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSalir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSalirActionPerformed(evt);
@@ -77,6 +78,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnRegistroProductos.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnRegistroProductos.setText("Registro de productos");
+        btnRegistroProductos.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnRegistroProductos.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRegistroProductos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -86,6 +88,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnRegistroUsuarios.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnRegistroUsuarios.setText("Registro de usuarios");
+        btnRegistroUsuarios.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnRegistroUsuarios.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRegistroUsuarios.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -95,6 +98,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnRegistroVentas.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnRegistroVentas.setText("Registro de ventas");
+        btnRegistroVentas.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnRegistroVentas.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRegistroVentas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -104,6 +108,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnInformes.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnInformes.setText("Informes");
+        btnInformes.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnInformes.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnInformes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -140,6 +145,7 @@ public class FormMainWindow extends javax.swing.JFrame {
 
         btnCerrarSecion.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         btnCerrarSecion.setText("Cerrar sesìon");
+        btnCerrarSecion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnCerrarSecion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCerrarSecionActionPerformed(evt);

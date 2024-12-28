@@ -22,7 +22,9 @@ public class EnvioCotizacion {
     public void enviarPorWhatsApp(String telefono, String rutaArchivo) {
         try {
             // Mensaje predeterminado para WhatsApp.
-            String mensaje = "¡Hola! Aquí está la cotización que solicitaste. Por favor revisa el archivo adjunto.";
+            String mensaje = "¡Hola! \n\nGracias por confiar en ZL Solución Integral. "
+                    + "Te enviamos la cotización que solicitaste. Por favor, revisa el archivo adjunto para conocer todos los detalles. "
+                    + "Si tienes alguna pregunta o necesitas ajustar algo, no dudes en contactarnos.\n\n¡Estamos aquí para ayudarte!";
             // Genera la URL para abrir WhatsApp Web con el mensaje predefinido.
             String urlWhatsApp = "https://wa.me/" + "+57" + telefono + "?text=" + URLEncoder.encode(mensaje, "UTF-8");
 
@@ -58,23 +60,22 @@ public class EnvioCotizacion {
             Session session = Session.getInstance(propiedades, new javax.mail.Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("seguridadlaboralhseq@gmail.com", ""); // Cambia por tus credenciales reales.
+                    return new PasswordAuthentication("zlsolucionintegral@gmail.com", "dcnj xudk hocn szty"); // Cambia por tus credenciales reales.
                 }
             });
 
             // Crear el mensaje de correo.
             MimeMessage mensajeCorreo = new MimeMessage(session);
-            mensajeCorreo.setFrom(new InternetAddress("seguridadlaboralhseq@gmail.com")); // Dirección del remitente.
+            mensajeCorreo.setFrom(new InternetAddress("zlsolucionintegral@gmail.com")); // Dirección del remitente.
             mensajeCorreo.setRecipients(Message.RecipientType.TO, InternetAddress.parse(correo)); // Destinatario.
             mensajeCorreo.setSubject("Cotización Generada"); // Asunto del correo.
 
             // Cuerpo del mensaje en texto.
             MimeBodyPart texto = new MimeBodyPart();
-            texto.setText("¡Hola! Espero que este mensaje te encuentre bien. "
-                    + "Aquí está la cotización que solicitaste. "
-                    + "El archivo adjunto contiene todos los detalles de los productos y servicios. "
-                    + "Por favor, no dudes en comunicarte si tienes alguna pregunta o necesitas realizar algún ajuste en la cotización. "
-                    + "¡Gracias por confiar en nosotros!");
+            texto.setText("¡Hola! \n\n"
+                    + "Adjuntamos la cotización que solicitaste. En ella encontrarás todos los detalles de los productos y servicios que necesitas. "
+                    + "Si tienes alguna pregunta, deseas realizar algún ajuste, o necesitas más información, "
+                    + "no dudes en ponerte en contacto con nosotros.\n\n¡Gracias por elegir ZL Solución Integral!\n\nSaludos cordiales,\nEl equipo de ZL Solución Integral.");
 
             // Archivo adjunto.
             MimeBodyPart adjunto = new MimeBodyPart();

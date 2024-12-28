@@ -309,6 +309,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
         btnCerrar.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         btnCerrar.setText("Cerrar secion");
+        btnCerrar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnCerrar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCerrarActionPerformed(evt);
@@ -317,6 +318,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
         btnMenuPrincipal.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         btnMenuPrincipal.setText("Menu Principal");
+        btnMenuPrincipal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnMenuPrincipal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnMenuPrincipalActionPerformed(evt);
@@ -348,6 +350,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
         btnAgregarAlCarrito.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnAgregarAlCarrito.setText("Agregar al carrito");
+        btnAgregarAlCarrito.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnAgregarAlCarrito.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAgregarAlCarritoActionPerformed(evt);
@@ -384,8 +387,10 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         jLabel11.setText("Metodo de pago:");
 
         checkEfectivo.setText("Efectivo");
+        checkEfectivo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
         checkCredito.setText("Credito");
+        checkCredito.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -588,6 +593,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
         jScrollPane1.setViewportView(listProCotizados);
 
         btnEliminar.setText("Eliminar");
+        btnEliminar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnEliminar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEliminarActionPerformed(evt);
@@ -598,6 +604,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
         btnCotizar.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         btnCotizar.setText("Cotizacion");
+        btnCotizar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnCotizar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCotizarActionPerformed(evt);
@@ -645,6 +652,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
         btnGuardarVenta.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnGuardarVenta.setText("Confirmar Venta");
+        btnGuardarVenta.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnGuardarVenta.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnGuardarVentaActionPerformed(evt);
@@ -653,6 +661,7 @@ public class FormRegistroVentas extends javax.swing.JFrame {
 
         btnLimpiarCarrito.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         btnLimpiarCarrito.setText("Limpiar carrito de compras");
+        btnLimpiarCarrito.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnLimpiarCarrito.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLimpiarCarritoActionPerformed(evt);
