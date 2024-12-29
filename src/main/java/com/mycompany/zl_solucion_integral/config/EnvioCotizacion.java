@@ -24,7 +24,8 @@ public class EnvioCotizacion {
             // Mensaje predeterminado para WhatsApp.
             String mensaje = "¡Hola! \n\nGracias por confiar en ZL Solución Integral. "
                     + "Te enviamos la cotización que solicitaste. Por favor, revisa el archivo adjunto para conocer todos los detalles. "
-                    + "Si tienes alguna pregunta o necesitas ajustar algo, no dudes en contactarnos.\n\n¡Estamos aquí para ayudarte!";
+                    + "Si tienes alguna pregunta o necesitas ajustar algo, no dudes en contactarnos."
+                    + "\n\n¡Estamos aquí para ayudarte!";
             // Genera la URL para abrir WhatsApp Web con el mensaje predefinido.
             String urlWhatsApp = "https://wa.me/" + "+57" + telefono + "?text=" + URLEncoder.encode(mensaje, "UTF-8");
 
@@ -75,7 +76,10 @@ public class EnvioCotizacion {
             texto.setText("¡Hola! \n\n"
                     + "Adjuntamos la cotización que solicitaste. En ella encontrarás todos los detalles de los productos y servicios que necesitas. "
                     + "Si tienes alguna pregunta, deseas realizar algún ajuste, o necesitas más información, "
-                    + "no dudes en ponerte en contacto con nosotros.\n\n¡Gracias por elegir ZL Solución Integral!\n\nSaludos cordiales,\nEl equipo de ZL Solución Integral.");
+                    + "no dudes en ponerte en contacto con nosotros."
+                    + "\n\n¡Gracias por elegir ZL Solución Integral!"
+                    + "\n\nSaludos cordiales,"
+                    + "\nEl equipo de ZL Solución Integral.");
 
             // Archivo adjunto.
             MimeBodyPart adjunto = new MimeBodyPart();
