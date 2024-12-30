@@ -29,7 +29,7 @@ public class FormRegistroUsuarios extends javax.swing.JFrame {
         usuarioCtrl.mostrarUsuarios(tbUsuarios);
 
         // Crear los campos de texto a llenar con los datos de la fila seleccionada
-        JTextField[] camposTexto = {txtNombre, txtTelefono, txtEmail, txtRol, txtContraseña};
+        JTextField[] camposTexto = {txtNombre, txtTelefono, txtEmail, txtRol};
 
         // Definir los índices de las columnas que quieres mostrar en los campos de texto
         int[] columnas = {1, 3, 2, 4, 5}; // Suponiendo que las columnas son: Nombre, Cantidad, Precio, Código
