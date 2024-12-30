@@ -1,7 +1,7 @@
-
 package com.mycompany.zl_solucion_integral.controllers;
 
 import com.mycompany.zl_solucion_integral.config.ConexionDB;
+import com.mycompany.zl_solucion_integral.config.Seguridad;
 import com.mycompany.zl_solucion_integral.models.Usuario;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,7 +25,6 @@ import java.util.logging.Logger;
  *
  * @author Dazac
  */
-
 public class UsuarioController {
 
     private final ConexionDB conexion = new ConexionDB();
@@ -42,12 +41,7 @@ public class UsuarioController {
      * usuario.
      */
     public void agregarUsuario(final Usuario usuario) {
-        // Verificar si el usuario ya existe
-        if (validarExistenciaUsuario(usuario.getNombre()) && usuario.getRol() == "1" && usuario.getRol() == "0") {
-            JOptionPane.showMessageDialog(null, "El usuario administrador o vendedor con ese nombre ya existe. Por favor, "
-                    + "elija otro nombre.");
-            return; // Detener la ejecución si el usuario ya existe
-        }
+        // Validar existencia del usuario y correo (omitir por brevedad)
 
         final String sql = "INSERT INTO usuarios (nombre, telefono, email, contraseña, rol) "
                 + "VALUES (?, ?, ?, ?, ?)";
@@ -58,7 +52,10 @@ public class UsuarioController {
             pstmt.setString(1, usuario.getNombre());
             pstmt.setString(2, usuario.getTelefono());
             pstmt.setString(3, usuario.getEmail());
-            pstmt.setString(4, usuario.getContraseña());
+
+            // Encriptar la contraseña antes de guardarla
+            String contraseñaEncriptada = Seguridad.encriptarContraseña(usuario.getContraseña());
+            pstmt.setString(4, contraseñaEncriptada);
             pstmt.setString(5, usuario.getRol());
 
             // Ejecutar la consulta SQL
@@ -102,7 +99,9 @@ public class UsuarioController {
             pstmt.setString(2, telefono);
             pstmt.setString(3, email);
             pstmt.setString(4, rol);
-            pstmt.setString(5, contraseña);
+            // Encriptar la contraseña antes de guardarla
+            String contraseñaEncriptada = Seguridad.encriptarContraseña(contraseña);
+            pstmt.setString(5, contraseñaEncriptada);
             pstmt.setInt(6, idUsuario);
 
             // Ejecutar la actualización
@@ -297,34 +296,46 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Valida las credenciales de un administrador.
-     *
-     * @param usuario Nombre del usuario administrador.
-     * @param contraseña Contraseña del usuario administrador.
-     * @return `true` si las credenciales son válidas, `false` en caso
-     * contrario.
-     */
-    public boolean validarCredencialesAdmin(final String usuario, final String contraseña) {
-        // Convertir el nombre de usuario a minúsculas
-        String usuarioEnMinusculas = usuario.toLowerCase();
-
-        final String sql = "SELECT COUNT(*) FROM usuarios WHERE "
-                + "nombre = ? AND contraseña = ? AND rol = 1";
+    public boolean validarCredencialesUsuarioRegular(final String usuario, final String contraseña) {
+        final String sql = "SELECT contraseña FROM usuarios WHERE nombre = ? AND rol != 1";
 
         try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // Asignar los parámetros
-            pstmt.setString(1, usuarioEnMinusculas); // Usar el usuario en minúsculas
-            pstmt.setString(2, contraseña);
+            pstmt.setString(1, usuario);
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    return true;
+                if (rs.next()) {
+                    // Obtén la contraseña encriptada de la base de datos
+                    String contraseñaEncriptada = rs.getString("contraseña");
+                    // Compara la contraseña ingresada con la almacenada
+                    return Seguridad.validarContraseña(contraseña, contraseñaEncriptada);
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error al validar credenciales", e);
+            logger.log(Level.SEVERE, "Error al validar credenciales del usuario regular", e);
+            JOptionPane.showMessageDialog(null, "Error al validar credenciales: " + e.getMessage());
+        } finally {
+            conexion.cerrarConexion();
+        }
+        return false;
+    }
+
+    public boolean validarCredencialesAdmin(final String usuario, final String contraseña) {
+        String usuarioEnMinusculas = usuario.toLowerCase();
+        final String sql = "SELECT contraseña FROM usuarios WHERE nombre = ? AND rol = 1";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, usuarioEnMinusculas);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Obtén la contraseña encriptada de la base de datos
+                    String contraseñaEncriptada = rs.getString("contraseña");
+                    // Compara la contraseña ingresada con la almacenada
+                    return Seguridad.validarContraseña(contraseña, contraseñaEncriptada);
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error al validar credenciales del administrador", e);
             JOptionPane.showMessageDialog(null, "Error al validar credenciales: " + e.getMessage());
         } finally {
             conexion.cerrarConexion();
@@ -358,28 +369,17 @@ public class UsuarioController {
         return false;
     }
 
-    /**
-     * Valida las credenciales de un usuario regular.
-     *
-     * @param usuario Nombre del usuario.
-     * @param contraseña Contraseña del usuario.
-     * @return `true` si las credenciales son válidas, `false` en caso
-     * contrario.
-     */
-    public boolean validarCredencialesUsuarioRegular(final String usuario, final String contraseña) {
-        final String sql = "SELECT COUNT(*) FROM usuarios WHERE nombre = ? AND contraseña = ? AND rol != 1";
+    public boolean validarExistenciaPorCorreo(final String email) {
+        final String sql = "SELECT COUNT(*) AS total FROM usuarios WHERE email = ?";
 
         try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, usuario);
-            pstmt.setString(2, contraseña);
-
+            pstmt.setString(1, email);
             try (ResultSet rs = pstmt.executeQuery()) {
-                return rs.next() && rs.getInt(1) > 0;
+                return rs.next() && rs.getInt("total") > 0;
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error al validar credenciales del usuario regular", e);
-            JOptionPane.showMessageDialog(null, "Error al validar credenciales: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error al validar existencia del correo", e);
+            JOptionPane.showMessageDialog(null, "Error al validar existencia de correo: " + e.getMessage());
         } finally {
             conexion.cerrarConexion();
         }
