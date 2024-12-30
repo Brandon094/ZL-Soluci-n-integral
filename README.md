@@ -1,10 +1,10 @@
 # ZL Solución Integral
 
-ZL Solución Integral es un software de gestión empresarial que facilita la administración de usuarios, productos, ventas e informes. Desarrollado en Java con interfaz gráfica Swing y una base de datos SQLite, ofrece un sistema de roles y permite un manejo eficiente de datos a través de módulos especializados.
+ZL Solución Integral es un software de gestión empresarial que facilita la administración de usuarios, productos, ventas e informes. Desarrollado en **Java** con interfaz gráfica **Swing** y una base de datos **SQLite**, ofrece un sistema de roles y permite un manejo eficiente de datos a través de módulos especializados.
 
 ## Requisitos para ejecutar la aplicación
 
-Para poder ejecutar esta aplicación es necesario tener instalado en el equipo el **Java Development Kit (JDK) 22** o una versión superior, ya que la aplicación está desarrollada en una versión de Java avanzada que requiere características específicas.
+Para poder ejecutar esta aplicación, es necesario tener instalado en el equipo el **Java Development Kit (JDK) 22** o una versión superior, ya que la aplicación está desarrollada en una versión de Java avanzada que requiere características específicas.
 
 ### Pasos para instalar Java Development Kit (JDK 22 o superior)
 
@@ -30,9 +30,18 @@ Para poder ejecutar esta aplicación es necesario tener instalado en el equipo e
      java version "22.0.1"
      ```
 
-4. **Ejecutar la aplicación:**
-   - Después de instalar el JDK, podrás ejecutar la aplicación haciendo doble clic en el archivo `.jar` de la aplicación `ZL_Solución_Integral-1.0.jar`.
-   - Si tu sistema no abre el archivo `.jar` directamente, puedes ejecutar el siguiente comando en la terminal o símbolo del sistema:
+### Base de datos
+
+La base de datos de **ZL Solución Integral** se encuentra en el repositorio y está almacenada en el archivo `base_de_datos.sqlite` en la raíz del proyecto. Este archivo contiene los datos iniciales necesarios para el funcionamiento de la aplicación.
+
+### Ejecutar la aplicación
+
+1. **Ejecutar la aplicación desde el archivo `.jar`**
+
+   Después de instalar el JDK, podrás ejecutar la aplicación haciendo doble clic en el archivo `.jar` de la aplicación `ZL_Solución_Integral-1.0.jar`.
+
+2. **Ejecutar la aplicación desde la terminal:**
+   - Si tu sistema no abre el archivo `.jar` directamente, puedes ejecutar la aplicación desde la terminal o símbolo del sistema con el siguiente comando:
      ```bash
      java -jar ZL_Solucion_Integral-1.0.jar
      ```
