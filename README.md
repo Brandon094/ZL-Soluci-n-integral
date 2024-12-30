@@ -31,10 +31,10 @@ Para poder ejecutar esta aplicación es necesario tener instalado en el equipo e
      ```
 
 4. **Ejecutar la aplicación:**
-   - Después de instalar el JDK, podrás ejecutar la aplicación haciendo doble clic en el archivo `.jar` de la aplicación `ZL_Solución_Integral-1.0-SNAPSHOT-jar-with-dependencies.jar`.
+   - Después de instalar el JDK, podrás ejecutar la aplicación haciendo doble clic en el archivo `.jar` de la aplicación `ZL_Solución_Integral-1.0.jar`.
    - Si tu sistema no abre el archivo `.jar` directamente, puedes ejecutar el siguiente comando en la terminal o símbolo del sistema:
      ```bash
-     java -jar ZL_Solucion_Integral-1.0-SNAPSHOT-jar-with-dependencies.jar
+     java -jar ZL_Solucion_Integral-1.0.jar
      ```
 
 Una vez seguidos estos pasos, la aplicación debería ejecutarse correctamente en tu equipo.
