@@ -4,40 +4,35 @@ ZL Solución Integral es un software de gestión empresarial que facilita la adm
 
 ## Requisitos para ejecutar la aplicación
 
-Para poder ejecutar esta aplicación, es necesario tener instalado en el equipo el **Java Development Kit (JDK) 17** o una versión compatible con Java 17, ya que la aplicación utiliza características específicas de esta versión.
+La aplicación incluye el **Java Development Kit (JDK) 17** necesario para su ejecución, el cual se encuentra en la carpeta `jdk17` en la raíz del repositorio.
 
-### Pasos para instalar Java Development Kit (JDK 17)
+### Pasos para configurar Java Development Kit (JDK 17)
 
-1. **Descargar JDK:**
-   - Visita la página oficial de Oracle u OpenJDK para descargar el JDK: [Descargar JDK](https://www.oracle.com/java/technologies/javase-jdk17-downloads.html).
-   - Selecciona la versión de JDK compatible con tu sistema operativo (Windows, macOS o Linux).
-   - Asegúrate de elegir la versión de 32 bits si tu sistema es de 32 bits, o de 64 bits si tu sistema es de 64 bits.
+1. **Acceder a la carpeta del JDK:**
+   - Navega a la carpeta `jdk17` en la raíz del repositorio.
 
-2. **Instalar JDK:**
-   - Ejecuta el instalador descargado.
-   - Sigue las instrucciones proporcionadas por el instalador.
-   - Acepta los términos y condiciones de la licencia cuando se te solicite.
-   - El instalador configurará automáticamente las variables de entorno necesarias.
+2. **Instalar o configurar el JDK:**
+   - Si tu sistema operativo requiere una instalación, ejecuta el instalador correspondiente desde la carpeta `jdk17` y sigue las instrucciones proporcionadas.
 
-3. **Verificar la instalación del JDK:**
+3. **Verificar la configuración del JDK:**
    - Abre una terminal o símbolo del sistema (cmd en Windows).
-   - Escribe el siguiente comando para verificar que el JDK está instalado correctamente:
+   - Escribe el siguiente comando para verificar que el JDK está configurado correctamente:
      ```bash
      java -version
      ```
    - Deberías ver una salida que muestre la versión de Java instalada, algo como:
      ```bash
-     java version "17.0.x"
+     java version "17.0.13"
      ```
 
 ### Base de datos
 
-La base de datos de **ZL Solución Integral** está almacenada en el archivo `base_de_datos.sqlite`, ubicado en la raíz del proyecto. Este archivo contiene los datos iniciales necesarios para el funcionamiento de la aplicación.
+La base de datos de **ZL Solución Integral** está almacenada en el archivo `DB.db`, ubicado en la raíz del proyecto. Este archivo contiene los datos iniciales necesarios para el funcionamiento de la aplicación. En la base de datos se ha creado un usuario genérico `admin` para poder iniciar la aplicación.
 
 ### Ejecutar la aplicación
 
 1. **Ejecutar la aplicación desde el archivo `.jar`**
-   - Asegúrate de que el JDK 17 esté instalado correctamente.
+   - Asegúrate de que el JDK 17 esté configurado correctamente.
    - Haz doble clic en el archivo `.jar` de la aplicación, `ZL_Solución_Integral-17.0.jar`.
 
 2. **Ejecutar la aplicación desde la terminal:**
@@ -48,7 +43,7 @@ La base de datos de **ZL Solución Integral** está almacenada en el archivo `ba
 
 3. **Problemas comunes al ejecutar:**
    - Si la aplicación no se ejecuta, verifica que:
-     - El JDK 17 está instalado y configurado correctamente.
+     - El JDK incluido en la carpeta `jdk17` está configurado correctamente.
      - El archivo `.jar` no está dañado.
      - No hay bloqueos del sistema operativo o antivirus.
 
