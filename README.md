@@ -1,6 +1,6 @@
-# ZL Solución Integral
+# Simplify Biz
 
-ZL Solución Integral es un software de gestión empresarial que facilita la administración de usuarios, productos, ventas e informes. Desarrollado en **Java 17** con interfaz gráfica **Swing** y una base de datos **SQLite**, ofrece un sistema de roles y permite un manejo eficiente de datos a través de módulos especializados.
+Simplify Biz es un software de gestión empresarial que facilita la administración de usuarios, productos, ventas e informes. Desarrollado en **Java 17** con interfaz gráfica **Swing** y una base de datos **SQLite**, ofrece un sistema de roles y permite un manejo eficiente de datos a través de módulos especializados.
 
 ## Requisitos para ejecutar la aplicación
 
@@ -27,18 +27,18 @@ La aplicación incluye el **Java Development Kit (JDK) 17** necesario para su ej
 
 ### Base de datos
 
-La base de datos de **ZL Solución Integral** está almacenada en el archivo `DB.db`, ubicado en la raíz del proyecto. Este archivo contiene los datos iniciales necesarios para el funcionamiento de la aplicación. En la base de datos se ha creado un usuario genérico `admin` para poder iniciar la aplicación.
+La base de datos de **Simplify Biz** está almacenada en el archivo `DB.db`, ubicado en la raíz del proyecto. Este archivo contiene los datos iniciales necesarios para el funcionamiento de la aplicación. En la base de datos se ha creado un usuario genérico `admin` para poder iniciar la aplicación.
 
 ### Ejecutar la aplicación
 
 1. **Ejecutar la aplicación desde el archivo `.jar`**
    - Asegúrate de que el JDK 17 esté configurado correctamente.
-   - Haz doble clic en el archivo `.jar` de la aplicación, `ZL_Solución_Integral-17.0.jar`.
+   - Haz doble clic en el archivo `.jar` de la aplicación, `Simplify_Biz-1.1.0.jar`.
 
 2. **Ejecutar la aplicación desde la terminal:**
    - Si tu sistema no abre el archivo `.jar` directamente, puedes ejecutarlo desde la terminal o símbolo del sistema con el siguiente comando:
      ```bash
-     java -jar ZL_Solución_Integral-17.0.jar
+     java -jar Simplify_Biz-1.1.0.jar
      ```
 
 3. **Problemas comunes al ejecutar:**
