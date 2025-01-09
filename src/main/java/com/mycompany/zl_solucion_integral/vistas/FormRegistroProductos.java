@@ -36,6 +36,8 @@ public class FormRegistroProductos extends javax.swing.JFrame {
 
         // Mostrar los datos de la tabla productos
         productoCtrl.mostrarProductos(tbProductos);
+        String totalRegistros = String.valueOf(productoCtrl.contarRegistros("Todas"));
+        textTotalRegistros.setText("Total registros:  " + totalRegistros);
 
         // Rellenar el JComboBox de categorias
         initComboBoxCategorias();
@@ -57,9 +59,8 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         ListCategoria.addItem("DOTACION DAMA"); // Agrega tus categorías
         ListCategoria.addItem("CALZADO"); // Agrega tus categorías
         ListCategoria.addItem("EPP"); // Agrega tus categorías
-        ListCategoria.addItem("BOTIQUIN");
-        ListCategoria.addItem("EQUIPO DE CONTINGENCIA");
-        ListCategoria.addItem("PUNTO ECOLOGICO");
+        ListCategoria.addItem("BOTIQUINES");
+        ListCategoria.addItem("SEÑALIZACION");
     }
 
     // Método para obtener los datos del formulario 
@@ -122,6 +123,7 @@ public class FormRegistroProductos extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jSeparator3 = new javax.swing.JSeparator();
+        textTotalRegistros = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -328,10 +330,18 @@ public class FormRegistroProductos extends javax.swing.JFrame {
 
         jLabel9.setText("Filtrar por:");
 
+        textTotalRegistros.setText("TOTAL DE REGISTROS: ");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(295, 295, 295)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(291, 291, 291))
+            .addComponent(jSeparator3)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -341,20 +351,19 @@ public class FormRegistroProductos extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel9)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel10)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ListCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1))
-                .addGap(12, 12, 12))
-            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(295, 295, 295)
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(291, 291, 291))
-            .addComponent(jSeparator3)
+                        .addComponent(textTotalRegistros)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel9)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel10)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(ListCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(12, 12, 12))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -376,11 +385,13 @@ public class FormRegistroProductos extends javax.swing.JFrame {
                             .addComponent(ListCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel10)
                             .addComponent(jLabel9))
-                        .addGap(6, 6, 6)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 422, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(textTotalRegistros)
+                .addGap(18, 18, 18)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(21, 21, 21))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -576,8 +587,15 @@ public class FormRegistroProductos extends javax.swing.JFrame {
     }//GEN-LAST:event_btnExportarActionPerformed
 
     private void ListCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ListCategoriaActionPerformed
-        String categoriaSelecionada = (String) ListCategoria.getSelectedItem();
-        productoCtrl.mostrarProductosPorCategoria(tbProductos, categoriaSelecionada);
+        // Obtener la categoría seleccionada del combo box
+        String categoriaSeleccionada = (String) ListCategoria.getSelectedItem();
+
+        // Mostrar los productos filtrados por la categoría seleccionada
+        productoCtrl.mostrarProductosPorCategoria(tbProductos, categoriaSeleccionada);
+
+        // Actualizar el total de registros
+        String totalRegistros = String.valueOf(productoCtrl.contarRegistros(categoriaSeleccionada));
+        textTotalRegistros.setText("Total registros: " + totalRegistros);
     }//GEN-LAST:event_ListCategoriaActionPerformed
     // Metodo para Limpiar el formulario  
     private void limpiarFormulario() {
@@ -625,6 +643,7 @@ public class FormRegistroProductos extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JTable tbProductos;
+    private javax.swing.JLabel textTotalRegistros;
     private javax.swing.JTextField txtCantidad;
     private javax.swing.JTextField txtCategoria;
     private javax.swing.JTextField txtCodigo;

@@ -408,6 +408,33 @@ public class ProductoController {
         }
     }
 
+// Método para contar registros dependiendo de la categoría
+    public int contarRegistros(String categoria) {
+        String query = "SELECT COUNT(*) AS total_registros FROM productos";
+        if (!categoria.equals("Todas")) { // Si no es "Todas", agrega el filtro de categoría
+            query += " WHERE categoria = ?";
+        }
+
+        int total = 0;
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            if (!categoria.equals("Todas")) {
+                pstmt.setString(1, categoria);
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt("total_registros");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return total;
+    }
+
     /**
      * Método para obtener el ID del producto seleccionado en una tabla.
      *
