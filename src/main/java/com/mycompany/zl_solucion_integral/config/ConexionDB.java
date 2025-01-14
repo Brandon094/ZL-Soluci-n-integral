@@ -142,7 +142,8 @@ public class ConexionDB {
                 + "cc_cliente TEXT NOT NULL,"
                 + "vendedor TEXT NOT NULL,"
                 + "fecha DATE NOT NULL,"
-                + "total REAL NOT NULL"
+                + "total REAL NOT NULL,"
+                + "metodo_pago TEXT NOT NULL"
                 + ");";
 
         try (Connection conn = establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {

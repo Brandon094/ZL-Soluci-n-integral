@@ -38,7 +38,7 @@ public class FormInfoVentas extends javax.swing.JFrame {
         JTextField[] camposTexto = {txtFechaInicio, txtFecha};
 
         // Definir los índices de las columnas que quieres mostrar en los campos de texto
-        int[] columnas = {8, 8};
+        int[] columnas = {9, 9};
 
         // Inicializar el método para obtener los datos del producto seleccionado
         listenerTb.agregarListenerTabla(tbVentasInformes, camposTexto, columnas);
@@ -383,8 +383,8 @@ public class FormInfoVentas extends javax.swing.JFrame {
 
         // Recorremos todas las filas de la tabla
         for (int i = 0; i < modelo.getRowCount(); i++) {
-            // Obtenemos el valor de la columna 10 (índice 9, porque las columnas empiezan en 0)
-            String valorColumna = modelo.getValueAt(i, 9).toString();
+            // Obtenemos el valor de la columna 11 (índice 10, porque las columnas empiezan en 0)
+            String valorColumna = modelo.getValueAt(i, 10).toString();
 
             // Convertimos el valor a double y lo sumamos (manejo de excepciones por seguridad)
             try {

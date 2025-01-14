@@ -63,7 +63,7 @@ public class VentasController {
 
     // Método para guardar venta
     public void guardarVenta(final Venta venta, List<Producto> productosVendidos, JTable tablaVentas) {
-        String sqlInsertVenta = "INSERT INTO ventas (cliente, cc_cliente, vendedor, fecha, total) VALUES (?, ?, ?, ?, ?)";
+        String sqlInsertVenta = "INSERT INTO ventas (cliente, cc_cliente, vendedor, fecha, total, metodo_pago) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlInsertDetalleVenta = "INSERT INTO detalles_venta (venta_id, producto, cantidad, codigo, precio, total) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlUpdateStock = "UPDATE productos SET cantidad = cantidad - ? WHERE codigo = ? AND cantidad >= ?";
 
@@ -94,6 +94,7 @@ public class VentasController {
             psVenta.setString(3, venta.getVendedor());
             psVenta.setDate(4, java.sql.Date.valueOf(venta.getFecha()));
             psVenta.setDouble(5, venta.getTotal());
+            psVenta.setString(6, venta.getMetodoPago());
 
             psVenta.executeUpdate();
             generatedKeys = psVenta.getGeneratedKeys();
@@ -358,15 +359,15 @@ public class VentasController {
         modelo.addColumn("Precio");
         modelo.addColumn("Cliente");
         modelo.addColumn("CC Cliente");
+        modelo.addColumn("Metodo pago");
         modelo.addColumn("Vendedor");
         modelo.addColumn("Fecha");
         modelo.addColumn("Precio Total");
-
         // Establecer el modelo de tabla vacío antes de cargar los datos
         tablaVentas.setModel(modelo);
 
         // Consulta SQL para obtener todas las ventas y sus detalles
-        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.fecha "
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha "
                 + "FROM ventas v "
                 + "JOIN detalles_venta d ON v.id = d.venta_id";
 
@@ -388,6 +389,7 @@ public class VentasController {
                     precio,
                     rs.getString("cliente"),
                     rs.getString("cc_cliente"),
+                    rs.getString("metodo_pago"),
                     rs.getString("vendedor"),
                     fechaFormateada,
                     precioTotal
@@ -399,14 +401,15 @@ public class VentasController {
             // Ajustar el tamaño de las columnas
             tablaVentas.getColumnModel().getColumn(0).setPreferredWidth(50);  // Id
             tablaVentas.getColumnModel().getColumn(1).setPreferredWidth(250); // Producto
-            tablaVentas.getColumnModel().getColumn(2).setPreferredWidth(50);  // Cantidad
+            tablaVentas.getColumnModel().getColumn(2).setPreferredWidth(80);  // Cantidad
             tablaVentas.getColumnModel().getColumn(3).setPreferredWidth(100); // Código
             tablaVentas.getColumnModel().getColumn(4).setPreferredWidth(75);  // Precio
             tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
             tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
-            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
-            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
-            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
+            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // metodo pago
+            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Vendedor
+            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Fecha
+            tablaVentas.getColumnModel().getColumn(10).setPreferredWidth(100); // Precio Total
 
             // Opcional: ajustar automáticamente las alturas de las filas si el contenido lo requiere
             //tablaVentas.setRowHeight(25);
@@ -457,8 +460,10 @@ public class VentasController {
             return;
         }
 
-        // Crear un modelo de tabla vacío
+        // Crear un nuevo modelo de tabla
         final DefaultTableModel modelo = new DefaultTableModel();
+
+        // Definir las columnas del modelo
         modelo.addColumn("Id");
         modelo.addColumn("Producto");
         modelo.addColumn("Cantidad");
@@ -466,15 +471,14 @@ public class VentasController {
         modelo.addColumn("Precio");
         modelo.addColumn("Cliente");
         modelo.addColumn("CC Cliente");
+        modelo.addColumn("Metodo pago");
         modelo.addColumn("Vendedor");
         modelo.addColumn("Fecha");
         modelo.addColumn("Precio Total");
-
         tablaVentas.setModel(modelo);
 
         // Consulta SQL con filtro por rango de fechas (timestamps)
-        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, "
-                + "v.cc_cliente, v.vendedor, v.fecha "
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha  "
                 + "FROM ventas v "
                 + "JOIN detalles_venta d ON v.id = d.venta_id "
                 + "WHERE v.fecha BETWEEN ? AND ?";
@@ -502,6 +506,7 @@ public class VentasController {
                         precio,
                         rs.getString("cliente"),
                         rs.getString("cc_cliente"),
+                        rs.getString("metodo_pago"),
                         rs.getString("vendedor"),
                         fechaLegible,
                         precioTotal
@@ -520,6 +525,7 @@ public class VentasController {
             tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
             tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
             tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
+            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // metodo pago
             tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
             tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
         } catch (Exception e) {
@@ -571,15 +577,14 @@ public class VentasController {
         modelo.addColumn("Precio");
         modelo.addColumn("Cliente");
         modelo.addColumn("CC Cliente");
+        modelo.addColumn("Metodo pago");
         modelo.addColumn("Vendedor");
         modelo.addColumn("Fecha");
         modelo.addColumn("Precio Total");
-
         tablaVentas.setModel(modelo);
 
         // Consulta SQL con filtro por rango de fechas (timestamps)
-        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, "
-                + "v.cc_cliente, v.vendedor, v.fecha "
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha  "
                 + "FROM ventas v "
                 + "JOIN detalles_venta d ON v.id = d.venta_id "
                 + "WHERE v.fecha BETWEEN ? AND ?";
@@ -607,6 +612,7 @@ public class VentasController {
                         precio,
                         rs.getString("cliente"),
                         rs.getString("cc_cliente"),
+                        rs.getString("metodo_pago"),
                         rs.getString("vendedor"),
                         fechaLegible,
                         precioTotal
@@ -616,7 +622,7 @@ public class VentasController {
 
             tablaVentas.setModel(modelo);
 
-            // Ajustar el tamaño de las columnas (opcional)
+            // Ajustar tamaños de columnas
             tablaVentas.getColumnModel().getColumn(0).setPreferredWidth(50);  // Id
             tablaVentas.getColumnModel().getColumn(1).setPreferredWidth(250); // Producto
             tablaVentas.getColumnModel().getColumn(2).setPreferredWidth(50);  // Cantidad
@@ -625,6 +631,7 @@ public class VentasController {
             tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
             tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
             tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
+            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // metodo pago
             tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
             tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
 
@@ -762,8 +769,4 @@ public class VentasController {
             return false;  // Retorna false si ocurre un error durante la operación
         }
     }
-    
-    // metodo para contar los registros 
-    
-    
 }

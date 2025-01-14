@@ -1,4 +1,4 @@
-package com.mycompany.zl_solucion_integral.util;
+package com.mycompany.zl_solucion_integral.config;
 
 import com.mycompany.zl_solucion_integral.config.ConexionDB;
 import org.apache.poi.ss.usermodel.*;
