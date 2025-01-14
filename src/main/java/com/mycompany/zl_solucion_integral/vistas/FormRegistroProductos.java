@@ -1,12 +1,12 @@
 package com.mycompany.zl_solucion_integral.vistas;
 
+import com.mycompany.zl_solucion_integral.config.ExcelSQLiteManager;
 import com.mycompany.zl_solucion_integral.config.Listener;
 import com.mycompany.zl_solucion_integral.config.PantallaCarga;
 import com.mycompany.zl_solucion_integral.config.SelecionRuta;
 import com.mycompany.zl_solucion_integral.config.UtilVentanas;
 import com.mycompany.zl_solucion_integral.controllers.ProductoController;
 import com.mycompany.zl_solucion_integral.models.Producto;
-import com.mycompany.zl_solucion_integral.util.ExcelSQLiteManager;
 import javax.swing.JFrame;
 
 import javax.swing.JOptionPane;
