@@ -37,21 +37,28 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.ParseException;
+import javax.swing.table.TableModel;
 
 /* Clase encargada de manejar las operaciones 
 relacionadas con las ventas en la base de datos*/
 public class VentasController {
 
-    private final Usuario cliente;
-    private final ConexionDB conexion; // Variable global para la conexión
-    private final Logger logger = Logger.getLogger(VentasController.class.getName());
-    private final Sesion sesion;
+    private Usuario cliente;
+    private ConexionDB conexion; // Variable global para la conexión
+    private Logger logger = Logger.getLogger(VentasController.class.getName());
+    private Sesion sesion;
 
     // Constructor
     public VentasController(Usuario cliente, Sesion sesion) {
         this.conexion = new ConexionDB(); // Instancia de la clase de conexión        
         this.sesion = sesion;
         this.cliente = cliente;
+    }
+
+    // Constructor adicional sin parámetros de Usuario y Sesion
+    public VentasController() {
+        this.conexion = new ConexionDB(); // Instancia de la clase de conexión
     }
 
     // Método para guardar venta
@@ -411,10 +418,284 @@ public class VentasController {
         }
     }
 
+    /**
+     * Método para mostrar las ventas en una tabla filtradas por rango de fechas
+     * con formato "dd/MM/yyyy".
+     *
+     * Este método realiza una consulta a la base de datos para obtener las
+     * ventas dentro de un rango de fechas especificado y las muestra en una
+     * tabla gráfica (`JTable`).
+     *
+     * @param tablaVentas La tabla (`JTable`) donde se mostrarán las ventas.
+     * @param fechaInicio Fecha de inicio del filtro en formato "dd/MM/yyyy".
+     * @param fechaFin Fecha de fin del filtro en formato "dd/MM/yyyy".
+     */
+    public void mostrarFechasDefinidas(JTable tablaVentas, String fechaInicio, String fechaFin) {
+        // Validar que las fechas tengan el formato correcto
+        if (!esFormatoFechaValido(fechaInicio)) {
+            JOptionPane.showMessageDialog(null, "La fecha de inicio ingresada no tiene un formato válido (dd/MM/yyyy).");
+            return;
+        }
+        if (!esFormatoFechaValido(fechaFin)) {
+            JOptionPane.showMessageDialog(null, "La fecha de finalización ingresada no tiene un formato válido (dd/MM/yyyy).");
+            return;
+        }
+
+        // Convertir las fechas a timestamp
+        long timestampInicio = 0;
+        long timestampFin = 0;
+        try {
+            SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+            formatoFecha.setLenient(false); // Para validar fechas estrictamente
+            Date inicio = formatoFecha.parse(fechaInicio);
+            Date fin = formatoFecha.parse(fechaFin);
+
+            timestampInicio = inicio.getTime();
+            timestampFin = fin.getTime();
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(null, "Error al convertir las fechas: " + e.getMessage());
+            return;
+        }
+
+        // Crear un modelo de tabla vacío
+        final DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("Id");
+        modelo.addColumn("Producto");
+        modelo.addColumn("Cantidad");
+        modelo.addColumn("Código");
+        modelo.addColumn("Precio");
+        modelo.addColumn("Cliente");
+        modelo.addColumn("CC Cliente");
+        modelo.addColumn("Vendedor");
+        modelo.addColumn("Fecha");
+        modelo.addColumn("Precio Total");
+
+        tablaVentas.setModel(modelo);
+
+        // Consulta SQL con filtro por rango de fechas (timestamps)
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, "
+                + "v.cc_cliente, v.vendedor, v.fecha "
+                + "FROM ventas v "
+                + "JOIN detalles_venta d ON v.id = d.venta_id "
+                + "WHERE v.fecha BETWEEN ? AND ?";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
+            // Establecer los valores del rango de fechas (timestamps) en la consulta
+            pst.setLong(1, timestampInicio);
+            pst.setLong(2, timestampFin);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    double precio = rs.getDouble("precio");
+                    int cantidad = rs.getInt("cantidad");
+                    double precioTotal = precio * cantidad;
+
+                    // Convertir el timestamp de la base de datos a una fecha legible
+                    long fechaTimestamp = rs.getLong("fecha");
+                    String fechaLegible = new SimpleDateFormat("dd/MM/yyyy").format(new Date(fechaTimestamp));
+
+                    modelo.addRow(new Object[]{
+                        rs.getInt("id"),
+                        rs.getString("producto"),
+                        cantidad,
+                        rs.getString("codigo"),
+                        precio,
+                        rs.getString("cliente"),
+                        rs.getString("cc_cliente"),
+                        rs.getString("vendedor"),
+                        fechaLegible,
+                        precioTotal
+                    });
+                }
+            }
+
+            tablaVentas.setModel(modelo);
+
+            // Ajustar tamaños de columnas
+            tablaVentas.getColumnModel().getColumn(0).setPreferredWidth(50);  // Id
+            tablaVentas.getColumnModel().getColumn(1).setPreferredWidth(250); // Producto
+            tablaVentas.getColumnModel().getColumn(2).setPreferredWidth(50);  // Cantidad
+            tablaVentas.getColumnModel().getColumn(3).setPreferredWidth(100); // Código
+            tablaVentas.getColumnModel().getColumn(4).setPreferredWidth(75);  // Precio
+            tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
+            tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
+            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
+            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
+            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error al mostrar ventas", e);
+            JOptionPane.showMessageDialog(null, "Error al mostrar ventas: " + e.getMessage());
+        } finally {
+            conexion.cerrarConexion();
+        }
+    }
+
+    /**
+     * Método para mostrar los registros de ventas de una fecha específica en
+     * formato dd/MM/yyyy.
+     *
+     * @param tablaVentas La tabla (`JTable`) donde se mostrarán los registros
+     * de ventas.
+     * @param fecha La fecha específica para filtrar los registros (formato:
+     * "dd/MM/yyyy").
+     */
+    public void mostrarVentasPorDia(JTable tablaVentas, String fecha) {
+        // Validar que la fecha tenga el formato correcto
+        if (!esFormatoFechaValido(fecha)) {
+            JOptionPane.showMessageDialog(null, "La fecha ingresada no tiene un formato válido (dd/MM/yyyy).");
+            return;
+        }
+
+        // Convertir la fecha a un rango de timestamp
+        long inicioDia = 0;
+        long finDia = 0;
+        try {
+            SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+            formatoFecha.setLenient(false); // Validación estricta
+            Date fechaInicio = formatoFecha.parse(fecha);
+
+            // Obtener el inicio y el fin del día
+            inicioDia = fechaInicio.getTime(); // 00:00:00
+            finDia = inicioDia + (24 * 60 * 60 * 1000) - 1; // 23:59:59
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(null, "Error al convertir la fecha: " + e.getMessage());
+            return;
+        }
+
+        // Crear un modelo de tabla vacío
+        final DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("Id");
+        modelo.addColumn("Producto");
+        modelo.addColumn("Cantidad");
+        modelo.addColumn("Código");
+        modelo.addColumn("Precio");
+        modelo.addColumn("Cliente");
+        modelo.addColumn("CC Cliente");
+        modelo.addColumn("Vendedor");
+        modelo.addColumn("Fecha");
+        modelo.addColumn("Precio Total");
+
+        tablaVentas.setModel(modelo);
+
+        // Consulta SQL con filtro por rango de fechas (timestamps)
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, "
+                + "v.cc_cliente, v.vendedor, v.fecha "
+                + "FROM ventas v "
+                + "JOIN detalles_venta d ON v.id = d.venta_id "
+                + "WHERE v.fecha BETWEEN ? AND ?";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pst = conn.prepareStatement(sql)) {
+            // Establecer los valores del rango de fechas (timestamps) en la consulta
+            pst.setLong(1, inicioDia);
+            pst.setLong(2, finDia);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    double precio = rs.getDouble("precio");
+                    int cantidad = rs.getInt("cantidad");
+                    double precioTotal = precio * cantidad;
+
+                    // Convertir el timestamp de la base de datos a una fecha legible
+                    long fechaTimestamp = rs.getLong("fecha");
+                    String fechaLegible = new SimpleDateFormat("dd/MM/yyyy").format(new Date(fechaTimestamp));
+
+                    modelo.addRow(new Object[]{
+                        rs.getInt("id"),
+                        rs.getString("producto"),
+                        cantidad,
+                        rs.getString("codigo"),
+                        precio,
+                        rs.getString("cliente"),
+                        rs.getString("cc_cliente"),
+                        rs.getString("vendedor"),
+                        fechaLegible,
+                        precioTotal
+                    });
+                }
+            }
+
+            tablaVentas.setModel(modelo);
+
+            // Ajustar el tamaño de las columnas (opcional)
+            tablaVentas.getColumnModel().getColumn(0).setPreferredWidth(50);  // Id
+            tablaVentas.getColumnModel().getColumn(1).setPreferredWidth(250); // Producto
+            tablaVentas.getColumnModel().getColumn(2).setPreferredWidth(50);  // Cantidad
+            tablaVentas.getColumnModel().getColumn(3).setPreferredWidth(100); // Código
+            tablaVentas.getColumnModel().getColumn(4).setPreferredWidth(75);  // Precio
+            tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
+            tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
+            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
+            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
+            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error al mostrar ventas por día", e);
+            JOptionPane.showMessageDialog(null, "Error al mostrar ventas por día: " + e.getMessage());
+        } finally {
+            conexion.cerrarConexion();
+        }
+    }
+
     // Método para formatear la fecha
     private String formatearFecha(Date fecha) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");  // Formato de fecha deseado
         return sdf.format(fecha);  // Retorna la fecha en formato legible
+    }
+
+    /**
+     * Método para validar si una fecha tiene el formato "dd/MM/yyyy".
+     *
+     * @param fecha La fecha en formato String que se desea validar.
+     * @return `true` si la fecha es válida, `false` en caso contrario.
+     */
+    public static boolean esFormatoFechaValido(String fecha) {
+        if (fecha == null || fecha.isEmpty()) {
+            return false; // Fecha vacía o nula no es válida
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        sdf.setLenient(false); // No permitir fechas como "31/02/2025"
+
+        try {
+            Date date = sdf.parse(fecha); // Intentar parsear la fecha
+            return true;
+        } catch (ParseException e) {
+            return false; // La fecha no es válida
+        }
+    }
+
+    public void exportarDatosTablaAExcel(JTable tabla, String rutaExcel) throws IOException {
+        // Crear un libro de trabajo de Excel
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Datos Exportados");
+
+        // Obtener el modelo de la tabla
+        TableModel model = tabla.getModel();
+
+        // Escribir los encabezados de la tabla en la primera fila del archivo Excel
+        Row headerRow = sheet.createRow(0);
+        for (int col = 0; col < model.getColumnCount(); col++) {
+            Cell cell = headerRow.createCell(col);
+            cell.setCellValue(model.getColumnName(col));
+        }
+
+        // Escribir los datos visibles de la tabla en las filas siguientes
+        for (int row = 0; row < model.getRowCount(); row++) {
+            Row excelRow = sheet.createRow(row + 1);
+            for (int col = 0; col < model.getColumnCount(); col++) {
+                Cell cell = excelRow.createCell(col);
+                Object value = model.getValueAt(row, col);
+                cell.setCellValue(value != null ? value.toString() : "");
+            }
+        }
+
+        // Guardar el archivo Excel en la ruta especificada
+        try (FileOutputStream fileOut = new FileOutputStream(rutaExcel)) {
+            workbook.write(fileOut);
+        }
+
+        // Cerrar el libro de trabajo
+        workbook.close();
     }
 
     public boolean generarArchivoCotizacionConPlantilla(String rutaPlantilla, String rutaArchivo, String numeroCotizacion, List<Venta> ventasCotizadas) {
@@ -481,5 +762,8 @@ public class VentasController {
             return false;  // Retorna false si ocurre un error durante la operación
         }
     }
-
+    
+    // metodo para contar los registros 
+    
+    
 }

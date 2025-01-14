@@ -29,7 +29,8 @@ public class FormMainWindow extends javax.swing.JFrame {
     private FormRegistroUsuarios formUsuarios;
     private FormRegistroProductos formProductos;
     private FormRegistroVentas formVentas;
-    private FormInformes formInformes;
+    private FormMenuInformes formInformes;
+    private FormInfoVentas formInfoVentas;
 
     /**
      * Constructor de la clase que inicializa la ventana 'manager_DB'. Invoca al
@@ -38,8 +39,7 @@ public class FormMainWindow extends javax.swing.JFrame {
     public FormMainWindow() {
         initComponents();
         setTitle("Menu administrador");
-        UtilVentanas.aplicarPantallaCompleta(this);
-        btnInformes.setVisible(false);
+        UtilVentanas.aplicarPantallaCompleta(this);        
     }
 
     @SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public class FormMainWindow extends javax.swing.JFrame {
         });
 
         btnInformes.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
-        btnInformes.setText("Informes");
+        btnInformes.setText("Informes Ventas");
         btnInformes.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnInformes.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnInformes.addActionListener(new java.awt.event.ActionListener() {
@@ -230,10 +230,10 @@ public class FormMainWindow extends javax.swing.JFrame {
     // Método para abrir la ventana de informes
     private void btnInformesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInformesActionPerformed
         this.setVisible(false); // Oculta la ventana actual
-        if (formInformes == null) {
-            formInformes = new FormInformes();
+        if (formInfoVentas == null) {
+            formInfoVentas = new FormInfoVentas();
         }
-        formInformes.setVisible(true); // Muestra la nueva ventana        
+        formInfoVentas.setVisible(true); // Muestra la nueva ventana        
     }//GEN-LAST:event_btnInformesActionPerformed
 
     private void btnCerrarSecionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarSecionActionPerformed

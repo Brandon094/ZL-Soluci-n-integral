@@ -54,7 +54,8 @@ public class Main {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error al inicializar la base de datos: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, 
+                    "Error al inicializar la base de datos: " + e.getMessage());
             return false;
         }
     }
@@ -68,8 +69,8 @@ public class Main {
      */
     private static void iniciarAplicacion() {
         FormLogIn loginForm = new FormLogIn();
-        loginForm.setVisible(true);
-       /*FormRegistroUsuarios ru = new FormRegistroUsuarios();
-       ru.setVisible(true);*/
+        //loginForm.setVisible(true);
+       FormRegistroUsuarios ru = new FormRegistroUsuarios();
+       ru.setVisible(true);
     }
 }

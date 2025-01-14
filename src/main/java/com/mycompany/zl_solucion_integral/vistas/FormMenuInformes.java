@@ -3,9 +3,9 @@ package com.mycompany.zl_solucion_integral.vistas;
 // @author Dazac
 import com.mycompany.zl_solucion_integral.config.UtilVentanas;
 
-public class FormInformes extends javax.swing.JFrame {
+public class FormMenuInformes extends javax.swing.JFrame {
 
-    public FormInformes() {
+    public FormMenuInformes() {
         initComponents();
         setTitle("Informes");
         UtilVentanas.aplicarPantallaCompleta(this);
@@ -21,7 +21,7 @@ public class FormInformes extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator2 = new javax.swing.JSeparator();
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        btnInfoVentasDiario = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
 
@@ -48,8 +48,13 @@ public class FormInformes extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
-        jButton1.setText("Informes de ventas");
+        btnInfoVentasDiario.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        btnInfoVentasDiario.setText("Informes de ventas");
+        btnInfoVentasDiario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInfoVentasDiarioActionPerformed(evt);
+            }
+        });
 
         jButton2.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         jButton2.setText("Informes de inventario");
@@ -66,7 +71,7 @@ public class FormInformes extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnInfoVentasDiario, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(112, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -77,7 +82,7 @@ public class FormInformes extends javax.swing.JFrame {
                 .addGap(27, 27, 27)
                 .addComponent(jButton3)
                 .addGap(28, 28, 28)
-                .addComponent(jButton1)
+                .addComponent(btnInfoVentasDiario)
                 .addContainerGap(238, Short.MAX_VALUE))
         );
 
@@ -138,6 +143,12 @@ public class FormInformes extends javax.swing.JFrame {
         System.exit(0);// Cierra la aplicacion 
     }//GEN-LAST:event_btnSalirActionPerformed
 
+    private void btnInfoVentasDiarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInfoVentasDiarioActionPerformed
+        this.setVisible(false);
+        FormInfoVentas formInfoDiarioVentas = new FormInfoVentas();
+        formInfoDiarioVentas.setVisible(true);
+    }//GEN-LAST:event_btnInfoVentasDiarioActionPerformed
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -152,35 +163,25 @@ public class FormInformes extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FormInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormMenuInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FormInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormMenuInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FormInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormMenuInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FormInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
+            java.util.logging.Logger.getLogger(FormMenuInformes.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }      
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FormInformes().setVisible(true);
+                new FormMenuInformes().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnInfoVentasDiario;
     private javax.swing.JButton btnMenuPrincipal;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;

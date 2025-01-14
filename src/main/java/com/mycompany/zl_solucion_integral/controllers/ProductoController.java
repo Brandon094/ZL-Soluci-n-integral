@@ -514,7 +514,7 @@ public class ProductoController {
         }
     }
 
-    /*
+     /*
      Método para buscar por código
      */
     public Producto buscarProductoPorCodigo(String codigoProducto) {
