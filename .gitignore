@@ -1,0 +1,13 @@
+# Ignorar todas las carpetas dentro de /target
+/target/*
+
+# Excepciones: no ignorar el archivo Simplify-Biz-1.2.0.jar
+!/target/Simplify-Biz-1.2.0.jar
+
+# No ignorar la carpeta /target/
+!/target/
+
+# También no ignorar otras carpetas o archivos que puedas querer mantener
+!/db/
+!/README.md/
+!/.gitignore/
