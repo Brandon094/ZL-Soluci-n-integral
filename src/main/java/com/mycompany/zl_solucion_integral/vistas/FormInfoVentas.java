@@ -35,10 +35,10 @@ public class FormInfoVentas extends javax.swing.JFrame {
         contarVentasUnicas();
         calcularPrecioTotalVentas();
         // Crear los campos de texto a llenar con los datos de la fila seleccionada
-        JTextField[] camposTexto = {txtFechaInicio, txtFecha};
+        JTextField[] camposTexto = {txtFechaInicio, txtFecha, txtPagoConfirmado};
 
         // Definir los índices de las columnas que quieres mostrar en los campos de texto
-        int[] columnas = {9, 9};
+        int[] columnas = {10, 10, 8};
 
         // Inicializar el método para obtener los datos del producto seleccionado
         listenerTb.agregarListenerTabla(tbVentasInformes, camposTexto, columnas);
@@ -71,6 +71,10 @@ public class FormInfoVentas extends javax.swing.JFrame {
         textPrecioTotalVentas = new javax.swing.JLabel();
         btnReiniciarFiltros = new javax.swing.JButton();
         btnExportarExcel = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        txtPagoConfirmado = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        btnCambiarValor = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -221,7 +225,7 @@ public class FormInfoVentas extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(textPrecioTotalVentas)
                     .addComponent(textNumVentas))
-                .addContainerGap(210, Short.MAX_VALUE))
+                .addContainerGap(94, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -247,6 +251,48 @@ public class FormInfoVentas extends javax.swing.JFrame {
             }
         });
 
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Confirmacion de pago"));
+
+        txtPagoConfirmado.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPagoConfirmadoActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setText("Cambie el valor si es necesario:");
+
+        btnCambiarValor.setText("Cambiar valor");
+        btnCambiarValor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCambiarValorActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(btnCambiarValor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(txtPagoConfirmado)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtPagoConfirmado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCambiarValor, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -262,20 +308,20 @@ public class FormInfoVentas extends javax.swing.JFrame {
                         .addComponent(btnMenuInformes))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(btnReiniciarFiltros, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(btnExportarExcel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnReiniciarFiltros, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
+                            .addComponent(btnExportarExcel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
             .addComponent(jSeparator2)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -287,16 +333,17 @@ public class FormInfoVentas extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(btnReiniciarFiltros)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnExportarExcel)
-                        .addGap(49, 49, 49)))
+                        .addComponent(btnExportarExcel))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(14, 14, 14)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -383,8 +430,8 @@ public class FormInfoVentas extends javax.swing.JFrame {
 
         // Recorremos todas las filas de la tabla
         for (int i = 0; i < modelo.getRowCount(); i++) {
-            // Obtenemos el valor de la columna 11 (índice 10, porque las columnas empiezan en 0)
-            String valorColumna = modelo.getValueAt(i, 10).toString();
+            // Obtenemos el valor de la columna 12 (índice 11 porque las columnas empiezan en 0)
+            String valorColumna = modelo.getValueAt(i, 11).toString();
 
             // Convertimos el valor a double y lo sumamos (manejo de excepciones por seguridad)
             try {
@@ -414,6 +461,7 @@ public class FormInfoVentas extends javax.swing.JFrame {
         txtFechaInicio.setText("");
         txtFechaFinalizacion.setText("");
         txtFecha.setText("");
+        txtPagoConfirmado.setText("");
         // Contar la ventas y el total de las ventas
         contarVentasUnicas();
         calcularPrecioTotalVentas();
@@ -451,6 +499,17 @@ public class FormInfoVentas extends javax.swing.JFrame {
             exportacionWorker.execute(); // Iniciar la tarea en segundo plano
         }
     }//GEN-LAST:event_btnExportarExcelActionPerformed
+
+    private void btnCambiarValorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCambiarValorActionPerformed
+        String pagoConfirmado = txtPagoConfirmado.getText();
+        int idSelecionado = ventasCtrl.obtenerIdVentaSeleccionado(tbVentasInformes);
+        ventasCtrl.actualizarPagoConfirmado(idSelecionado, pagoConfirmado);
+        ventasCtrl.MostrarVentas(tbVentasInformes);
+    }//GEN-LAST:event_btnCambiarValorActionPerformed
+
+    private void txtPagoConfirmadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPagoConfirmadoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPagoConfirmadoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -503,6 +562,7 @@ public class FormInfoVentas extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCambiarValor;
     private javax.swing.JButton btnExportarExcel;
     private javax.swing.JButton btnFiltrar01;
     private javax.swing.JButton btnFiltrar02;
@@ -513,9 +573,11 @@ public class FormInfoVentas extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
@@ -525,5 +587,6 @@ public class FormInfoVentas extends javax.swing.JFrame {
     private javax.swing.JTextField txtFecha;
     private javax.swing.JTextField txtFechaFinalizacion;
     private javax.swing.JTextField txtFechaInicio;
+    private javax.swing.JTextField txtPagoConfirmado;
     // End of variables declaration//GEN-END:variables
 }

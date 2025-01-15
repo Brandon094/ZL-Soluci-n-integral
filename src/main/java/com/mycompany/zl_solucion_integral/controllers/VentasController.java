@@ -61,9 +61,8 @@ public class VentasController {
         this.conexion = new ConexionDB(); // Instancia de la clase de conexión
     }
 
-    // Método para guardar venta
     public void guardarVenta(final Venta venta, List<Producto> productosVendidos, JTable tablaVentas) {
-        String sqlInsertVenta = "INSERT INTO ventas (cliente, cc_cliente, vendedor, fecha, total, metodo_pago) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlInsertVenta = "INSERT INTO ventas (cliente, cc_cliente, vendedor, fecha, total, metodo_pago, pago_confirmado) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String sqlInsertDetalleVenta = "INSERT INTO detalles_venta (venta_id, producto, cantidad, codigo, precio, total) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlUpdateStock = "UPDATE productos SET cantidad = cantidad - ? WHERE codigo = ? AND cantidad >= ?";
 
@@ -87,6 +86,9 @@ public class VentasController {
                 }
             }
 
+            // Determinar el valor de la columna "pago_confirmado"
+            String pagoConfirmado = venta.getMetodoPago().equalsIgnoreCase("crédito") ? "deudor" : "";
+
             // Insertar venta general
             psVenta = conn.prepareStatement(sqlInsertVenta, Statement.RETURN_GENERATED_KEYS);
             psVenta.setString(1, venta.getCliente().getNombre());
@@ -95,6 +97,7 @@ public class VentasController {
             psVenta.setDate(4, java.sql.Date.valueOf(venta.getFecha()));
             psVenta.setDouble(5, venta.getTotal());
             psVenta.setString(6, venta.getMetodoPago());
+            psVenta.setString(7, pagoConfirmado);
 
             psVenta.executeUpdate();
             generatedKeys = psVenta.getGeneratedKeys();
@@ -128,7 +131,7 @@ public class VentasController {
 
             // Confirmar transacción
             conn.commit();
-            JOptionPane.showMessageDialog(null, "Venta guardada  y stock actualizado exitosamente.");
+            JOptionPane.showMessageDialog(null, "Venta guardada y stock actualizado exitosamente.");
             MostrarVentas(tablaVentas);
 
         } catch (SQLException e) {
@@ -360,6 +363,7 @@ public class VentasController {
         modelo.addColumn("Cliente");
         modelo.addColumn("CC Cliente");
         modelo.addColumn("Metodo pago");
+        modelo.addColumn("Pago confirmado");
         modelo.addColumn("Vendedor");
         modelo.addColumn("Fecha");
         modelo.addColumn("Precio Total");
@@ -367,7 +371,7 @@ public class VentasController {
         tablaVentas.setModel(modelo);
 
         // Consulta SQL para obtener todas las ventas y sus detalles
-        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha "
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha, v.pago_confirmado "
                 + "FROM ventas v "
                 + "JOIN detalles_venta d ON v.id = d.venta_id";
 
@@ -390,6 +394,7 @@ public class VentasController {
                     rs.getString("cliente"),
                     rs.getString("cc_cliente"),
                     rs.getString("metodo_pago"),
+                    rs.getString("pago_confirmado"),
                     rs.getString("vendedor"),
                     fechaFormateada,
                     precioTotal
@@ -407,9 +412,10 @@ public class VentasController {
             tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
             tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
             tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // metodo pago
-            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Vendedor
-            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Fecha
-            tablaVentas.getColumnModel().getColumn(10).setPreferredWidth(100); // Precio Total
+            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // pago confirmado
+            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Vendedor
+            tablaVentas.getColumnModel().getColumn(10).setPreferredWidth(100); // Fecha
+            tablaVentas.getColumnModel().getColumn(11).setPreferredWidth(100); // Precio Total
 
             // Opcional: ajustar automáticamente las alturas de las filas si el contenido lo requiere
             //tablaVentas.setRowHeight(25);
@@ -472,13 +478,14 @@ public class VentasController {
         modelo.addColumn("Cliente");
         modelo.addColumn("CC Cliente");
         modelo.addColumn("Metodo pago");
+        modelo.addColumn("Pago confirmado");
         modelo.addColumn("Vendedor");
         modelo.addColumn("Fecha");
         modelo.addColumn("Precio Total");
         tablaVentas.setModel(modelo);
 
         // Consulta SQL con filtro por rango de fechas (timestamps)
-        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha  "
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha, v.pago_confirmado "
                 + "FROM ventas v "
                 + "JOIN detalles_venta d ON v.id = d.venta_id "
                 + "WHERE v.fecha BETWEEN ? AND ?";
@@ -507,6 +514,7 @@ public class VentasController {
                         rs.getString("cliente"),
                         rs.getString("cc_cliente"),
                         rs.getString("metodo_pago"),
+                        rs.getString("pago_confirmado"),
                         rs.getString("vendedor"),
                         fechaLegible,
                         precioTotal
@@ -525,9 +533,10 @@ public class VentasController {
             tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
             tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
             tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
-            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // metodo pago
-            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
-            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
+            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // metodo pago
+            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // pago confirmado            
+            tablaVentas.getColumnModel().getColumn(10).setPreferredWidth(100); // Fecha
+            tablaVentas.getColumnModel().getColumn(11).setPreferredWidth(100); // Precio Total
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error al mostrar ventas", e);
             JOptionPane.showMessageDialog(null, "Error al mostrar ventas: " + e.getMessage());
@@ -578,13 +587,14 @@ public class VentasController {
         modelo.addColumn("Cliente");
         modelo.addColumn("CC Cliente");
         modelo.addColumn("Metodo pago");
+        modelo.addColumn("Pago confirmado");
         modelo.addColumn("Vendedor");
         modelo.addColumn("Fecha");
         modelo.addColumn("Precio Total");
         tablaVentas.setModel(modelo);
 
         // Consulta SQL con filtro por rango de fechas (timestamps)
-        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha  "
+        final String sql = "SELECT v.id, d.producto, d.cantidad, d.codigo, d.precio, v.cliente, v.cc_cliente, v.vendedor, v.metodo_pago, v.fecha, v.pago_confirmado  "
                 + "FROM ventas v "
                 + "JOIN detalles_venta d ON v.id = d.venta_id "
                 + "WHERE v.fecha BETWEEN ? AND ?";
@@ -613,6 +623,7 @@ public class VentasController {
                         rs.getString("cliente"),
                         rs.getString("cc_cliente"),
                         rs.getString("metodo_pago"),
+                        rs.getString("pago_confirmado"),
                         rs.getString("vendedor"),
                         fechaLegible,
                         precioTotal
@@ -631,9 +642,10 @@ public class VentasController {
             tablaVentas.getColumnModel().getColumn(5).setPreferredWidth(150); // Cliente
             tablaVentas.getColumnModel().getColumn(6).setPreferredWidth(100); // CC Cliente
             tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // Vendedor
-            tablaVentas.getColumnModel().getColumn(7).setPreferredWidth(100); // metodo pago
-            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // Fecha
-            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // Precio Total
+            tablaVentas.getColumnModel().getColumn(8).setPreferredWidth(100); // metodo pago
+            tablaVentas.getColumnModel().getColumn(9).setPreferredWidth(100); // pago confirmado
+            tablaVentas.getColumnModel().getColumn(10).setPreferredWidth(100); // Fecha
+            tablaVentas.getColumnModel().getColumn(11).setPreferredWidth(100); // Precio Total
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error al mostrar ventas por día", e);
@@ -769,4 +781,24 @@ public class VentasController {
             return false;  // Retorna false si ocurre un error durante la operación
         }
     }
+
+    public void actualizarPagoConfirmado(int ventaId, String pagoConfirmado) {
+        String sql = "UPDATE ventas SET pago_confirmado = ? WHERE id = ?";
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, pagoConfirmado);
+            ps.setInt(2, ventaId);
+
+            int filasActualizadas = ps.executeUpdate();
+            if (filasActualizadas > 0) {
+                JOptionPane.showMessageDialog(null, "El estado de pago fue actualizado correctamente.");
+            } else {
+                JOptionPane.showMessageDialog(null, "No se encontró una venta con el ID especificado.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error al actualizar el estado de pago: " + e.getMessage());
+        }
+    }
+
 }
