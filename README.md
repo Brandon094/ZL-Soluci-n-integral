@@ -38,12 +38,12 @@ La base de datos de **Simplify Biz** está almacenada en el archivo `DB.db`, ubi
 
 1. **Ejecutar la aplicación desde el archivo `.jar`**
    - Asegúrate de que el JDK 17 esté configurado correctamente.
-   - Haz doble clic en el archivo `.jar` de la aplicación, `Simplify_Biz-1.1.0.jar`.
+   - Haz doble clic en el archivo `.jar` de la aplicación, `Simplify_Biz-1.2.0.jar`.
 
 2. **Ejecutar la aplicación desde la terminal:**
    - Si tu sistema no abre el archivo `.jar` directamente, puedes ejecutarlo desde la terminal o símbolo del sistema con el siguiente comando:
      ```bash
-     java -jar Simplify_Biz-1.1.0.jar
+     java -jar Simplify_Biz-1.2.0.jar
      ```
 
 3. **Problemas comunes al ejecutar:**
