@@ -9,4 +9,5 @@
 # Excepciones: no ignorar estas carpetas/archivos
 !/target/
 !/db/
-!/README.md
+!/README.md/
+!/.gitignore/
