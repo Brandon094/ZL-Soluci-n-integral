@@ -44,4 +44,3 @@ Si encuentras problemas al ejecutar la aplicación, verifica lo siguiente:
 ---
 
 ✨ ¡Eso es todo! Una vez realizados estos pasos, la aplicación estará lista para su uso. Si necesitas más ayuda, no dudes en abrir una **issue** en este repositorio. 😊
-```
