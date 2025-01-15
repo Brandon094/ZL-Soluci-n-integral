@@ -1,6 +1,12 @@
+# Ignorar todo
+*
 /target/classes/
 /target/generated-sources/
 /target/generated-test-sources/
 /target/maven-archiver/
 /target/maven-status/
 /target/test-classes/
+# Excepciones: no ignorar estas carpetas/archivos
+!/target/
+!/db/
+!/README.md
