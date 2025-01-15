@@ -6,13 +6,13 @@ El archivo ejecutable de la aplicación está ubicado en la carpeta **`target`**
 
 ### 📂 **Ubicar el archivo ejecutable**
 Dentro de la carpeta **`target`**, encontrarás el archivo `.jar` llamado:  
-**`Simplify_Biz-1.1.0.jar`**  
+**`Simplify_Biz-1.2.0.jar`**  
 
 ---
 
 ### 🖱️ **Ejecutar desde el archivo `.jar`**
 1. Asegúrate de que el **JDK 17** esté configurado correctamente en tu sistema.  
-2. Haz doble clic en el archivo **`Simplify_Biz-1.1.0.jar`** para iniciar la aplicación.
+2. Haz doble clic en el archivo **`Simplify_Biz-1.2.0.jar`** para iniciar la aplicación.
 
 ---
 
@@ -21,7 +21,7 @@ Si prefieres ejecutar el archivo desde la terminal o símbolo del sistema, sigue
 1. Navega a la carpeta **`target`** del proyecto.  
 2. Usa el siguiente comando:  
    ```bash
-   java -jar target/Simplify_Biz-1.1.0.jar
+   java -jar target/Simplify_Biz-1.2.0.jar
    ```
 
 ---
@@ -45,5 +45,3 @@ Si encuentras problemas al ejecutar la aplicación, verifica lo siguiente:
 
 ✨ ¡Eso es todo! Una vez realizados estos pasos, la aplicación estará lista para su uso. Si necesitas más ayuda, no dudes en abrir una **issue** en este repositorio. 😊
 ```
-
-Este formato incluye emojis para hacerlo más visual y secciones bien separadas para facilitar la lectura. ¿Te gustaría agregar algo más o ajustar algún detalle?
