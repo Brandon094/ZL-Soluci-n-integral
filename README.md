@@ -46,7 +46,7 @@ Este archivo contiene los datos iniciales necesarios para el funcionamiento de l
 🔑 En la base de datos se ha creado un usuario genérico:  
 
 - **👤 Usuario:** `admin`  
-- **🔒 Contraseña:** *(vacía por defecto)*  
+- **🔒 Contraseña:** `admin`  
 
 ---
 
