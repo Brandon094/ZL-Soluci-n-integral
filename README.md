@@ -1,6 +1,3 @@
-Aquí está el mensaje completo, ahora formateado en Markdown con un estilo claro y profesional:  
-
-```markdown
 # **Simplify Biz**
 
 **Simplify Biz** es un software de gestión empresarial que facilita la administración de usuarios, productos, ventas e informes.  
@@ -92,6 +89,3 @@ Asegúrate de que el archivo no se corrompió al descargarlo o copiarlo.
 ✨ **¡Eso es todo!**  
 Una vez realizados estos pasos, la aplicación estará lista para su uso.  
 Si necesitas más ayuda, no dudes en abrir una **issue** en este repositorio. 😊
-```
-
-Este formato es claro y fácil de leer, además de incluir detalles importantes con un diseño visualmente atractivo. ¿Te gustaría ajustar algo más? 😊
